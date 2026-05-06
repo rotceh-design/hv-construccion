@@ -1,7 +1,7 @@
 import React from 'react';
 import { Wrench, ArrowRight, Shield, ChevronDown, Minus, Plus, Check } from 'lucide-react';
 import { SERVICIOS_DETALLE } from '../../data/serviciosData';
-import { SUBOPCIONES, CAT_ICON, fmt, fmtUF, BackBtn } from './CotizadorPage';
+import { SUBOPCIONES, CAT_ICON, fmt, fmtUF, BackBtn } from './Cotizadorpage';
 
 const SuboptCard = ({ opt, selected, onToggle }) => {
   const isSlot = !opt.img || opt.img.endsWith('_IMG');

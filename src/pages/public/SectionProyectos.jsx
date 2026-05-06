@@ -4,7 +4,7 @@ import {
   Droplets, Paintbrush, Box, Cpu, AlertTriangle, Trash2, BookOpen, Ruler 
 } from 'lucide-react';
 import { PROYECTOS_DATA, UF_VALOR } from '../../data/serviciosData';
-import { fmt, fmtUF, BackBtn } from './CotizadorPage';
+import { fmt, fmtUF, BackBtn } from './Cotizadorpage';
 
 // ─── ESTILOS BRUTALISTAS ARQUITECTÓNICOS ──────────────────────────────
 const ARCH_CSS = `
