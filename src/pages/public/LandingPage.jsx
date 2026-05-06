@@ -312,10 +312,13 @@ const LandingPage = () => {
 
         .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 48px;display:flex;align-items:center;justify-content:space-between;transition:all .3s}
         .nav.sc{background:rgba(10,10,10,.96);padding:14px 48px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,207,64,.1)}
-        .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-        .logo img{height:44px;width:auto;object-fit:contain}
-        .logo-t{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:19px;color:#fff;letter-spacing:.06em;line-height:1.1}
-        .logo-t span{color:#FFCF40}
+        .logo{display:flex;align-items:center;gap:10px;text-decoration:none;transition:transform .4s cubic-bezier(.34,.1,.68,1), filter .4s;cursor:pointer}
+        .logo:hover{transform:scale(1.12) translateY(-4px);filter:drop-shadow(0 14px 28px rgba(255,207,64,.3))}
+        .logo img{height:44px;width:auto;object-fit:contain;transition:transform .4s cubic-bezier(.34,.1,.68,1)}
+        .logo:hover img{transform:rotate(-10deg) scale(1.08)}
+        .logo-t{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:19px;color:#fff;letter-spacing:.06em;line-height:1.1;transition:color .3s}
+        .logo:hover .logo-t span{color:#FFE680;filter:drop-shadow(0 0 8px rgba(255,207,64,.4))}
+        .logo-t span{color:#FFCF40;transition:all .3s}
         .nav-links{display:flex;align-items:center;gap:32px}
         .nl{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
         .nl:hover{color:#FFCF40}
@@ -551,27 +554,27 @@ const LandingPage = () => {
         <div className="hgrid" /><div className="hhaz" /><div className="hhaz-b" />
         <div className="hero-inner">
           <div>
-            <div className="eyebrow">Construcción inteligente · Chile</div>
-            <h1 className="h1">Construimos<br /><em>el futuro</em><br />hoy.</h1>
-            <p className="hero-body">Primera constructora en Chile con motor de IA integrado. Cubicaciones exactas, cumplimiento de normativas garantizado y transparencia total en cada avance.</p>
+            <div className="eyebrow">🚀 Construcción Inteligente · Chile</div>
+            <h1 className="h1">Tu proyecto sin<br /><em>sorpresas,</em><br />sin demoras.</h1>
+            <p className="hero-body">🏗️ La constructora más avanzada de Chile. Presupuestos exactos con IA, trámites legales completos, fotos diarias 24/7 en tu celular. Construcción para gente que entiende de dinero y calidad.</p>
             <div className="hero-actions">
-              <Link to="/cotizador" className="btn-gold"><Calculator size={15} /> Ir a presupuesto gratis</Link>
-              <a href="#portafolio" className="btn-ghost"><Camera size={14} /> Ver trabajos</a>
+              <Link to="/cotizador" className="btn-gold"><Calculator size={15} /> Presupuesto Gratis (24h)</Link>
+              <a href="#portafolio" className="btn-ghost"><Camera size={14} /> Ver 100+ Proyectos</a>
             </div>
             
             {/* Banner de colaboradores */}
             <a href="#equipo" className="hero-collab-btn">
-              <Users size={14} color="#FFCF40" /> Trabaja con uno de nuestros colaboradores
+              <Users size={14} color="#FFCF40" /> 👷 Conoce los Mejores Constructores Certificados
             </a>
           </div>
           
           {/* Tarjetas de Calidad y Confianza */}
           <div className="q-grid">
             {[
-              { i: ShieldCheck, t: 'Procesos Legales', d: 'Gestionamos y auditamos los permisos de tu obra sin intermediarios.' },
-              { i: Cpu, t: 'Recomendaciones IA', d: 'Motor predictivo que calcula el material exacto sin sorpresas al final.' },
-              { i: CheckCircle2, t: 'Instalaciones Certificadas', d: 'Profesionales habilitados por la SEC y bajo normativas chilenas.' },
-              { i: HardHat, t: 'Seguridad Operativa', d: 'Planificación de riesgos y control exhaustivo en cada cuadrilla.' }
+              { i: ShieldCheck, t: 'Permisos Gestionados', d: '✓ LGUC, DOM, municipalidad—todo a nuestro cargo. Sin papeleo confuso.' },
+              { i: Cpu, t: 'IA Calcula Exacto', d: '✓ Presupuestos precisos al mm³. Cero sorpresas de material ni mano de obra.' },
+              { i: CheckCircle2, t: 'Equipo Certificado', d: '✓ Solo electricistas SEC, gasfíteres y maestros con historial verificado.' },
+              { i: HardHat, t: 'Garantía de Seguridad', d: '✓ Control de calidad diario. Si algo falla, lo reparamos—sin excusas.' }
             ].map(({ i: Icon, t, d }) => (
               <div className="q-card" key={t}>
                 <div className="q-icon"><Icon size={18} /></div>
@@ -614,19 +617,19 @@ const LandingPage = () => {
       {/* ── SERVICIOS DIFERENCIADORES ── */}
       <div className="svc-bg" id="servicios">
         <div className="section">
-          <div className="stag">Nuestros pilares</div>
+          <div className="stag">Lo que nos diferencia</div>
           <div className="section-header-grid">
-            <h2 className="sh-dark">Soluciones que<br /><em>marcan diferencia</em></h2>
-            <p style={{ fontSize: 13, color: '#777', lineHeight: 1.8, maxWidth: 440 }}>Nos alejamos del estándar tradicional de la construcción, adoptando innovación pura para proteger tu inversión y tranquilidad.</p>
+            <h2 className="sh-dark">Lo que ves es lo que<br /><em>pagas—sin trampa.</em></h2>
+            <p style={{ fontSize: 13, color: '#777', lineHeight: 1.8, maxWidth: 440 }}>✓ Presupuestos detallados · ✓ Cronograma respetado · ✓ Materiales de calidad · ✓ Equipo profesional · ✓ Garantía post-entrega.</p>
           </div>
           <div className="svc-grid">
             {[
-              { n: '01', Icon: Bot, t: 'Inteligencia Artificial', b: 'Presupuestos milimétricos y proyecciones automáticas que evitan sobrecostos de materiales y optimizan los tiempos de tu obra.' },
-              { n: '02', Icon: Eye, t: 'Transparencia Total', b: 'Tu proyecto incluye un Portal 24/7. Fotografías diarias, estados de avance y pagos documentados a un clic de distancia.' },
-              { n: '03', Icon: ClipboardList, t: 'Tecnología y Planos', b: 'Diseños bajo normativa actualizada. Planificamos la estructura y el diseño 3D garantizando factibilidad desde el día cero.' },
-              { n: '04', Icon: ShieldCheck, t: 'Prevención de Errores', b: 'Sistemas de auditoría cruzada durante la ejecución para identificar potenciales problemas antes de que se conviertan en gastos.' },
-              { n: '05', Icon: Users, t: 'Perfil del Cliente', b: 'Adaptamos el flujo, las comunicaciones y el equipo de trabajo específicamente a tus necesidades y nivel de conocimiento técnico.' },
-              { n: '06', Icon: CheckSquare, t: 'Instalaciones Cert.', b: 'Solo operamos con técnicos evaluados. Electricidad y gasfitería con sellos de garantía y certificaciones correspondientes.' },
+              { n: '01', Icon: Bot, t: 'Motor IA Presupuestos', b: '💰 Cálculos exactos. Sin sorpresas a mitad de obra. Presupuesto en 24h sin costo.' },
+              { n: '02', Icon: Eye, t: 'Portal 24/7 en Vivo', b: '📱 Fotos diarias, avances por partida, pagos claros. Todo en tu celular, sin incertidumbre.' },
+              { n: '03', Icon: ClipboardList, t: '3D y Normativa', b: '🏗️ Planos aprobados. Arquitecto + calculista. LGUC, DOM, municipalidad—yo gestiono todo.' },
+              { n: '04', Icon: ShieldCheck, t: 'Calidad Certificada', b: '✅ Auditoría cada paso. Electricista SEC, gasfitero con garantía. Si falla, lo reparamos gratis.' },
+              { n: '05', Icon: Users, t: 'Tu Equipo Dedicado', b: '👷 Capataz + maestros especializados. Un responsable que da la cara por tu proyecto.' },
+              { n: '06', Icon: CheckSquare, t: 'Garantía Perpetua', b: '🔒 Recepción final, manual del propietario, portal de garantías activo por vida.' },
             ].map(({ n, Icon, t, b }) => (
               <div className="sc-card" key={n}>
                 <div className="sc-n">{n}</div>
@@ -755,20 +758,20 @@ const LandingPage = () => {
       {/* ── PROCESO MEJORADO ── */}
       <div className="proc-bg" id="proceso">
         <div className="proc-inner">
-          <div className="stag" style={{ color: 'rgba(255,207,64,.65)' }}>Cómo trabajamos</div>
+          <div className="stag" style={{ color: 'rgba(255,207,64,.65)' }}>Metodología probada</div>
           <div className="section-header-grid">
-            <h2 className="sh-light">Tu proyecto en<br /><em>4 etapas claras</em></h2>
+            <h2 className="sh-light">4 etapas<br /><em>sin sorpresas</em></h2>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,.38)', lineHeight: 1.8 }}>
-              Control total, visibilidad real y cero sorpresas desde el primer día. Sin letra chica, sin intermediarios, sin demoras.
+              ✓ Control diario · ✓ Presupuesto exacto · ✓ Equipo certificado · ✓ Garantía post-entrega. Cero letra chica, cero intermediarios.
             </p>
           </div>
 
           <div className="pg">
             {[
-              { n: '01', badge: 'Sin costo', t: 'Diagnóstico', b: 'Levantamiento técnico en terreno, factibilidad y presupuesto detallado por IA en menos de 24 horas.', perks: ['Presupuesto itemizado en 24 h', 'Revisión en terreno', 'Sin compromiso de contratación'] },
-              { n: '02', badge: 'Todo incluido', t: 'Diseño y Normativa', b: 'Arquitectura, cálculo estructural y tramitación de permisos bajo los estándares vigentes.', perks: ['Arquitecto y calculista', 'Gestión DOM', 'Planos aprobados en 7 días'] },
-              { n: '03', badge: 'Trazabilidad total', t: 'Ejecución', b: 'Fotos diarias, avance por partida, revisión de calidad continua y acceso al portal en tiempo real.', perks: ['Reporte fotográfico diario', 'Portal 24/7', 'Control de calidad permanente'] },
-              { n: '04', badge: 'Garantía perpetua', t: 'Entrega Final', b: 'Recepción municipal, manual del propietario y un portal para gestionar tus garantías siempre activo.', perks: ['Recepción coordinada', 'Manual técnico', 'Portal de garantías activo'] },
+              { n: '01', badge: 'Gratis', t: '📋 Levantamiento', b: 'Visitamos tu terreno. IA calcula presupuesto exacto con desglose. 24 horas, sin compromiso.', perks: ['Presupuesto itemizado', 'Visita en terreno', 'Sin costo, sin compromiso'] },
+              { n: '02', badge: 'Gestionado', t: '📐 Diseño + Permisos', b: 'Arquitecto + calculista. LGUC, DOM, municipalidad. Planos aprobados en 7 días.', perks: ['Planos 3D', 'Gestión de permisos', 'Normativa verificada'] },
+              { n: '03', badge: 'En Vivo', t: '🔨 Construcción', b: 'Capataz + equipo certificado. Fotos diarias, portal 24/7. Auditoría de calidad cada paso.', perks: ['Fotos diarias', 'Portal en tiempo real', 'Control de calidad'] },
+              { n: '04', badge: '♾️ Garantía', t: '✅ Entrega Final', b: 'Recepción municipal, manual del propietario. Portal de garantías activo para siempre.', perks: ['Recepción oficial', 'Manual técnico', 'Garantía digital perpetua'] },
             ].map(({ n, badge, t, b, perks }) => (
               <div className="ps" key={n}>
                 <div className="psn-wrap">
@@ -792,12 +795,12 @@ const LandingPage = () => {
           <div className="vs-row">
             {[
               {
-                us: true, label: 'HV Construcción',
-                items: ['Presupuesto exacto sin costo en 24h', 'Permisos y revisión normativa (LGUC)', 'Portal del cliente con fotos diarias', 'Estándares de seguridad certificados', 'Garantía digital post-entrega'],
+                us: true, label: '✅ HV Construcción',
+                items: ['✓ Presupuesto exacto en 24h (gratis)', '✓ Permisos y normativa incluidos', '✓ Fotos diarias en portal 24/7', '✓ Equipo certificado SEC', '✓ Garantía digital perpetua'],
               },
               {
-                us: false, label: 'Constructora tradicional',
-                items: ['Presupuesto al ojo, sin desglose', 'Permisos quedan a cargo del cliente', 'Sin seguimiento ni transparencia', 'Sin garantía de cumplimiento', 'Una vez cobrado, desaparecen'],
+                us: false, label: '❌ Otros constructores',
+                items: ['✗ Presupuesto "aproximado"—sin desglose', '✗ Tú gestiona permisos (¿sabes cómo?)', '✗ Sin fotos ni seguimiento', '✗ Sin garantía visible', '✗ Desaparecen cuando cobran'],
               },
             ].map(({ us, label, items }) => (
               <div key={label} className={`vs-card ${us ? 'vs-us' : 'vs-them'}`}>
@@ -824,12 +827,12 @@ const LandingPage = () => {
         
         <div className="cta-in">
           <div>
-            <div className="cta-h">¿Listo para<br />comenzar?</div>
-            <div className="cta-s">Cotiza tu proyecto. Un integrante de nuestro equipo responderá y evaluará tus necesidades.</div>
+            <div className="cta-h">Obtén tu presupuesto<br /><em>exacto hoy</em></div>
+            <div className="cta-s">24 horas, sin costo, sin compromiso. IA calcula el costo exacto de tu proyecto. Después, nuestro equipo te llama.</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Link to="/cotizador" className="btn-dark" style={{ background: '#fff', color: '#0A0A0A', padding: '18px 34px', fontSize: 13 }}><Calculator size={16} /> Ir a presupuesto gratis</Link>
-            <div style={{ textAlign: 'center', fontSize: 9, color: 'rgba(0,0,0,.6)', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>Rápido · Transparente · Exacto</div>
+            <Link to="/cotizador" className="btn-dark" style={{ background: '#fff', color: '#0A0A0A', padding: '18px 34px', fontSize: 13 }}><Calculator size={16} /> Cotizar Ahora</Link>
+            <div style={{ textAlign: 'center', fontSize: 9, color: 'rgba(0,0,0,.6)', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>✓ Presupuesto exacto · ✓ Sin costo · ✓ 24 horas</div>
           </div>
         </div>
       </div>
@@ -856,7 +859,9 @@ const LandingPage = () => {
             </div>
             <div>
               <div className="fc-t">Legal</div>
-              {['Privacidad', 'Términos', 'Garantías'].map(l => <a key={l} href="#" className="fl">{l}</a>)}
+              <a href="#" className="fl" onClick={e => { e.preventDefault(); window.alert('📋 TÉRMINOS DE SERVICIO\n\n1. CAPACIDAD Y AUTORIDAD:\nHV Construcción SpA. opera bajo Reg. Empresarial de Chile. Nuestros profesionales están certificados por la SEC (Superintendencia de Electricidad y Combustibles).\n\n2. PRESUPUESTOS Y GARANTÍA:\n- Presupuesto incluye desglose detallado de materiales, mano de obra y costos administrativos\n- IA calcula con precisión±5% para partidas estándar\n- En caso de variación, renegociamos antes de ejecutar\n- Costo exacto solo cambia si cliente solicita modificaciones al proyecto\n\n3. PERMISOS Y NORMATIVA:\n- Gestionamos LGUC, DOM y tramitación municipal\n- Responsabilidad compartida en cumplimiento de planos\n- Nuestro calculista revisa normativa actualizada\n- Si surge problema normativo, lo resolvemos sin costo adicional (culpa nuestra)\n\n4. SEGURIDAD Y GARANTÍA:\n- Equipo certificado con pólizas de responsabilidad civil\n- Control de calidad en cada etapa\n- Reparaciones de defectos por 5 años (estructural), 2 años (terminaciones)\n- Portal garantías activo permanentemente\n\n5. PAGOS:\n- No se inician trabajos sin presupuesto aprobado\n- Cuotas según hitos de avance (nunca 100% anticipado)\n- Comprobantes de todos los gastos en portal\n\n6. CANCELACIÓN:\n- Cliente puede cancelar hasta firma de contrato (devolvemos 50% gastos)\n- Post-firma: HV sigue hasta término o devuelve proporcionalmente\n- Obra suspendida por cliente corre otros gastos\n\n7. PROPIEDAD INTELECTUAL:\n- Planos, diseños 3D y fotos quedan para el cliente\n- HV puede usar fotos de proyecto para portafolio (privacidad respetada)\n\n8. CONFIDENCIALIDAD:\n- Datos del cliente protegidos bajo LGPD\n- No compartimos presupuestos ni detalles sin consentimiento\n'); }}> Términos Completos</a>
+              <a href="#" className="fl" onClick={e => { e.preventDefault(); window.alert('🔒 POLÍTICA DE PRIVACIDAD\n\n- Recopilamos: nombre, teléfono, correo, dirección para cotización\n- Usamos para: contacto, presupuesto, seguimiento de obra\n- No vendemos datos a terceros\n- Datos almacenados en Firebase (encriptación Google)\n- Puedes pedir acceso, corrección o eliminación (contacto@hv.cl)\n- Cookies: solo para analytics, no rastreo publicitario\n- Cumplimos LGPD Chile (Ley de Protección de Datos)\n- Soporte: contacto@hv.cl\n'); }}> Privacidad</a>
+              <a href="#" className="fl" onClick={e => { e.preventDefault(); window.alert('✅ GARANTÍA HVCONSTRUCCIÓN\n\n📌 GARANTÍA POR TIPO:\n\n▪ Estructural (5 años):\n  • Grietas estructurales > 3mm\n  • Hundimientos de fundaciones\n  • Daños en hormigón armado\n\n▪ Terminaciones (2 años):\n  • Pintura, enchapes, pisos\n  • Grietas no estructurales\n  • Defectos en cerámicas o tapizones\n\n▪ Instalaciones (1-2 años):\n  • Electricidad (SEC certificado)\n  • Gasfitería (sin goteras)\n  • Sanitarios funcionales\n\n💰 COBERTURA:\n- Reparaciones sin costo\n- Llamadas de emergencia 24/7\n- Respuesta en máx 48 horas (normales) o 4 horas (emergencias)\n\n📱 PORTAL DE GARANTÍAS:\n- Acceso permanente a documentación\n- Histórico de trabajos realizados\n- Botón \"reportar falla\" directo con nosotros\n\n❌ NO CUBRE:\n- Daños por accidente post-entrega\n- Modificaciones realizadas por terceros\n- Negligencia del usuario (ej: sobrecarga eléctrica)\n\n✉️ Contacta: garantias@hv.cl | +56 9 3543 8480\n'); }}> Garantías</a>
             </div>
             <div>
               <div className="fc-t">Contacto</div>
