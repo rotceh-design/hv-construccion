@@ -2968,104 +2968,165 @@ export const PROYECTOS_DATA = {
   },
 
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // 6. TECHOS
+// ══════════════════════════════════════════════════════════════════════════
+  // 6. TECHOS Y COBERTIZOS
   // ══════════════════════════════════════════════════════════════════════════
   techos: {
-    label:  'Techos',
+    label:  'Techos y Cobertizos',
     emoji:  '☂️',
     ufMin:  1.5,
-    ufMax:  5,
+    ufMax:  14.5,
     unidad: 'm²',
-    desc:   'Recambio de cubiertas, reparación, cerchas, aislación y hojalatería completa.',
+    desc:   'Construcción integral de techumbres y terrazas. Incluye la elección del diseño arquitectónico, fundaciones, sistema de doble placa, estructuras, cubiertas, hojalatería y electricidad.',
 
     grupos: [
 
       {
         id: 'tec_A',
-        nombre: 'Demolición / Retiro Cubierta Existente',
+        nombre: 'Diseño Arquitectónico y Estilo del Techo',
+        desc: 'Definición de la geometría y forma del cobertizo, quincho o terraza. Esta elección determina la estética, el escurrimiento de aguas lluvias y la complejidad estructural.',
         items: [
-          { id: 'tec_A01', nombre: 'Retiro cubierta zinc / plancha metálica', unidad: 'm²', ufRef: 0.22 },
-          { id: 'tec_A02', nombre: 'Retiro teja española / francesa', unidad: 'm²', ufRef: 0.30 },
-          { id: 'tec_A03', nombre: 'Retiro teja asfáltica + OSB', unidad: 'm²', ufRef: 0.28 },
-          { id: 'tec_A04', nombre: 'Retiro de cerchas madera / metalcon', unidad: 'ud', ufRef: 0.35 },
-          { id: 'tec_A05', nombre: 'Flete retiro a botadero autorizado', unidad: 'm³', ufRef: 0.60 },
+          { id: 'tec_A01', nombre: 'Techo a Un Agua (Pendiente Simple)', desc: 'Ideal para extensiones, terrazas y estacionamientos adosados a un muro de la casa. El agua escurre hacia un solo frente.', unidad: 'gl', ufRef: 1.00 },
+          { id: 'tec_A02', nombre: 'Techo a Dos Aguas (Clásico / Gablete)', desc: 'Diseño tradicional en forma de triángulo. Perfecto para quinchos independientes. Permite excelente altura interior y ventilación.', unidad: 'gl', ufRef: 1.50 },
+          { id: 'tec_A03', nombre: 'Techo a Cuatro Aguas (Estilo Faldones)', desc: 'Estilo tipo glorieta o colonial. El agua escurre hacia los cuatro lados perimetrales. Excelente para quinchos grandes e independientes.', unidad: 'gl', ufRef: 2.50 },
+          { id: 'tec_A04', nombre: 'Techo Mediterráneo (Corte Recto / Oculto)', desc: 'Tendencia moderna. Techo visualmente plano con pendiente mínima oculta tras un tapacán perimetral ancho. Muy usado en terrazas minimalistas.', unidad: 'gl', ufRef: 1.80 },
+          { id: 'tec_A05', nombre: 'Techo Curvo o Abovedado', desc: 'Estructura arqueada, generalmente con cerchas metálicas o vigas de madera laminada. Clásico para estacionamientos con policarbonato.', unidad: 'gl', ufRef: 2.20 },
+          { id: 'tec_A06', nombre: 'Pérgola Abierta (Treillage / Sombreadero)', desc: 'Vigas a la vista sin cubierta impermeable. Uso exclusivo para dar sombra mediante palillos, coligües o mallas.', unidad: 'gl', ufRef: 1.20 },
+          { id: 'tec_A07', nombre: 'Techo en "L" (Dos aguas interceptadas)', desc: 'Diseño complejo para terrazas que envuelven la esquina de la casa. Requiere instalación de limahoya para unir las pendientes de los dos techos.', unidad: 'gl', ufRef: 3.00 },
         ],
       },
 
       {
         id: 'tec_B',
-        nombre: 'Estructura (Cerchas y Costaneras)',
+        nombre: 'Diagnóstico, Ingeniería y Trabajos Previos',
+        desc: 'Evaluaciones técnicas iniciales y preparación del área para asegurar la viabilidad estructural y proteger la propiedad durante la obra.',
         items: [
-          { id: 'tec_B01', nombre: 'Cercha madera pino seco a dos aguas (fabricación + inst)', unidad: 'ud', ufRef: 1.50 },
-          { id: 'tec_B02', nombre: 'Cercha metálica tubular galvanizada a dos aguas', unidad: 'ud', ufRef: 2.10 },
-          { id: 'tec_B03', nombre: 'Costaneras pino 2×2" cada 80cm', unidad: 'm²', ufRef: 0.30 },
-          { id: 'tec_B04', nombre: 'Correa Omega metálica C-100 cada 80cm', unidad: 'm²', ufRef: 0.28 },
-          { id: 'tec_B05', nombre: 'Viga cumbrera madera 2×6"', unidad: 'ml', ufRef: 0.22 },
-          { id: 'tec_B06', nombre: 'Zuncho perimetral metálico (amarre cerchas)', unidad: 'ml', ufRef: 0.18 },
-          { id: 'tec_B07', nombre: 'Reparación / refuerzo cercha existente (por cercha)', unidad: 'ud', ufRef: 0.65 },
+          { id: 'tec_B01', nombre: 'Visita técnica y evaluación estructural', desc: 'Determinación de la capacidad de los muros existentes para soportar nuevas cargas de techumbre.', unidad: 'gl', ufRef: 1.50 },
+          { id: 'tec_B02', nombre: 'Cálculo estructural básico', desc: 'Para cobertizos y ampliaciones menores; asegura resistencia contra cargas de viento y sismo.', unidad: 'gl', ufRef: 3.50 },
+          { id: 'tec_B03', nombre: 'Encarpado y protección contra lluvias', desc: 'Uso de lonas de alta densidad para evitar inundaciones o daños al interior de la vivienda durante el desarme.', unidad: 'gl', ufRef: 1.20 },
+          { id: 'tec_B04', nombre: 'Instalación de andamios y líneas de vida', desc: 'Equipamiento de seguridad para trabajo seguro en altura.', unidad: 'gl', ufRef: 2.00 },
+          { id: 'tec_B05', nombre: 'Demolición parcial y apertura de apoyos', desc: 'Romper cadenas o muros para insertar y anclar de manera segura las nuevas vigas maestras.', unidad: 'pto', ufRef: 0.85 },
         ],
       },
 
       {
         id: 'tec_C',
-        nombre: 'Aislación y Membrana',
+        nombre: 'Desarme y Retiro de Cubiertas Existentes',
+        desc: 'Remoción cuidadosa de materiales antiguos y su correcta disposición legal.',
         items: [
-          { id: 'tec_C01', nombre: 'Membrana hidrófuga respirable (Tyvek Housewrap)', unidad: 'm²', ufRef: 0.15 },
-          { id: 'tec_C02', nombre: 'Fieltro asfáltico 15 lbs (bajo teja / plancha)', unidad: 'm²', ufRef: 0.10 },
-          { id: 'tec_C03', nombre: 'Aislación lana mineral 80mm (cielo bajo cubierta)', unidad: 'm²', ufRef: 0.35 },
-          { id: 'tec_C04', nombre: 'Aislación lana mineral 100mm (cielo bajo cubierta)', unidad: 'm²', ufRef: 0.42 },
-          { id: 'tec_C05', nombre: 'Aislación Fisitherm / EPS 50mm', unidad: 'm²', ufRef: 0.28 },
-          { id: 'tec_C06', nombre: 'Barrera de vapor (polietileno 0.15mm interior)', unidad: 'm²', ufRef: 0.08 },
+          { id: 'tec_C01', nombre: 'Retiro cubierta zinc / planchas metálicas', desc: 'Desarme rápido, incluye desatornillado y acopio en suelo.', unidad: 'm²', ufRef: 0.22 },
+          { id: 'tec_C02', nombre: 'Retiro teja asfáltica + base OSB deteriorada', desc: 'Remoción de capas adheridas y placas podridas por filtraciones pasadas.', unidad: 'm²', ufRef: 0.35 },
+          { id: 'tec_C03', nombre: 'Retiro teja de arcilla o cemento', desc: 'Proceso lento y pesado debido al alto peso del material a bajar a mano.', unidad: 'm²', ufRef: 0.45 },
+          { id: 'tec_C04', nombre: 'Desarme cuidadoso de cerchas o tijerales', desc: 'Corte y remoción de la estructura de soporte de madera o metal antigua.', unidad: 'ud', ufRef: 0.60 },
+          { id: 'tec_C05', nombre: 'Retiro preventivo asbesto cemento (Pizarreño)', desc: 'Desmonte bajo protocolo SEREMI, embolsado y manejo de residuos peligrosos.', unidad: 'm²', ufRef: 1.10 },
+          { id: 'tec_C06', nombre: 'Flete y disposición final de escombros', desc: 'Transporte a botadero autorizado con certificado medioambiental.', unidad: 'm³', ufRef: 0.75 },
         ],
       },
 
       {
         id: 'tec_D',
-        nombre: 'Cubierta',
+        nombre: 'Fundaciones y Soportes Verticales (Pilares)',
+        desc: 'Elementos verticales que transmiten las cargas al suelo. Variantes de tamaño según la envergadura y luz (distancia) del techo.',
         items: [
-          { id: 'tec_D01', nombre: 'Cubierta teja asfáltica 3 pestañas (base OSB 18mm)', unidad: 'm²', ufRef: 1.30 },
-          { id: 'tec_D02', nombre: 'Cubierta teja asfáltica arquitectónica (alta definición)', unidad: 'm²', ufRef: 1.65 },
-          { id: 'tec_D03', nombre: 'Cubierta Zinc-Alum PV4 trapecial prepintado', unidad: 'm²', ufRef: 0.65 },
-          { id: 'tec_D04', nombre: 'Cubierta plancha ondulada galvanizada N°27', unidad: 'm²', ufRef: 0.50 },
-          { id: 'tec_D05', nombre: 'Cubierta panel sandwich PUR 40mm (techado + aislación)', unidad: 'm²', ufRef: 1.80 },
-          { id: 'tec_D06', nombre: 'Cubierta teja española (sobre rastreles madera)', unidad: 'm²', ufRef: 1.90 },
-          { id: 'tec_D07', nombre: 'Cubierta membrana asfáltica APP 4mm (azotea plana)', unidad: 'm²', ufRef: 1.10 },
-          { id: 'tec_D08', nombre: 'Cubierta membrana TPO 1.5mm (azotea plana)', unidad: 'm²', ufRef: 1.50 },
+          { id: 'tec_D01', nombre: 'Trazado, excavación y hormigonado de poyos', desc: 'Excavación manual de 40x40x60cm y llenado con hormigón H20.', unidad: 'ud', ufRef: 0.95 },
+          { id: 'tec_D02', nombre: 'Pilar pino finger 4x4" (90x90mm)', desc: 'Para pérgolas ligeras y luces cortas. Incluye pletina base y anclaje.', unidad: 'ml', ufRef: 0.75 },
+          { id: 'tec_D03', nombre: 'Pilar pino finger 5x5" (115x115mm)', desc: 'El estándar para cobertizos de madera. Incluye herrajes de base y superiores.', unidad: 'ml', ufRef: 0.95 },
+          { id: 'tec_D04', nombre: 'Pilar madera nativa (Roble/Pellín) 6x6"', desc: 'Estética rústica/premium, para grandes cargas. Incluye anclaje pesado oculto.', unidad: 'ml', ufRef: 1.80 },
+          { id: 'tec_D05', nombre: 'Pilar metálico tubular 100x100x3mm', desc: 'Estilo industrial/moderno. Incluye placa base soldada y pintura anticorrosiva.', unidad: 'ml', ufRef: 1.15 },
+          { id: 'tec_D06', nombre: 'Anclajes epóxicos de pilares a radier existente', desc: 'Fijación química de alta resistencia sin necesidad de romper la losa completa.', unidad: 'ud', ufRef: 0.45 },
         ],
       },
 
       {
         id: 'tec_E',
-        nombre: 'Hojalatería y Aguas Lluvias',
+        nombre: 'Estructura Principal (Vigas y Cerchas)',
+        desc: 'El esqueleto del techo. Los componentes incluyen sus respectivos conectores estructurales para evitar pérdidas en el cálculo.',
         items: [
-          { id: 'tec_E01', nombre: 'Cumbrera zinc-alum prepintada', unidad: 'ml', ufRef: 0.25 },
-          { id: 'tec_E02', nombre: 'Limahoyas zinc-alum prepintadas', unidad: 'ml', ufRef: 0.30 },
-          { id: 'tec_E03', nombre: 'Limatesas (coronamiento quiebre positivo)', unidad: 'ml', ufRef: 0.28 },
-          { id: 'tec_E04', nombre: 'Tapacán fibrocemento 15cm pintado', unidad: 'ml', ufRef: 0.18 },
-          { id: 'tec_E05', nombre: 'Canaleta PVC ø100mm + soportes + union', unidad: 'ml', ufRef: 0.22 },
-          { id: 'tec_E06', nombre: 'Bajada aguas lluvias PVC ø100mm + collarines', unidad: 'ml', ufRef: 0.18 },
-          { id: 'tec_E07', nombre: 'Empalme bajada a canalización enterrada', unidad: 'ud', ufRef: 0.35 },
-          { id: 'tec_E08', nombre: 'Flash / vierteaguas ventana zinc-alum', unidad: 'ud', ufRef: 0.18 },
-          { id: 'tec_E09', nombre: 'Botaguas base muro + plancha zinc-alum (transición)', unidad: 'ml', ufRef: 0.22 },
-          { id: 'tec_E10', nombre: 'Pasatecho impermeable PVC (ventilación / antena)', unidad: 'ud', ufRef: 0.20 },
+          { id: 'tec_E01', nombre: 'Viga maestra pino insigne seca 2x6" / 2x8"', desc: 'Para entramados de luces cortas a medias. Incluye conectores metálicos U.', unidad: 'ml', ufRef: 0.75 },
+          { id: 'tec_E02', nombre: 'Viga maestra Oregón Nacional 2x8" / 2x10"', desc: 'Para techos con viga a la vista donde la viga aporta un alto valor estético.', unidad: 'ml', ufRef: 1.20 },
+          { id: 'tec_E03', nombre: 'Vigas estructurales I-Joists (Vigas 2T)', desc: 'Soportan mayores luces sin pilares intermedios. Incluyen conectores de alma.', unidad: 'ml', ufRef: 1.35 },
+          { id: 'tec_E04', nombre: 'Cercha prefabricada de madera', desc: 'Armada con placas dentadas. Incluye conectores tipo Hurricane Clip a muros.', unidad: 'ud', ufRef: 1.85 },
+          { id: 'tec_E05', nombre: 'Cercha acero galvanizado Metalcon', desc: 'Incombustible e indeformable. Incluye tornillería estructural y escuadras de anclaje.', unidad: 'ud', ufRef: 2.45 },
+          { id: 'tec_E06', nombre: 'Arriostramiento estructural (Cruz de San Andrés)', desc: 'Crucetas que evitan la deformación lateral del entramado por fuerzas de viento/sismo.', unidad: 'm²', ufRef: 0.35 },
         ],
       },
 
       {
         id: 'tec_F',
-        nombre: 'Cielo Interior Bajo Cubierta',
+        nombre: 'Cámara de Aire, Entramados Base y Aislación (Sistema Doble Placa)',
+        desc: 'Esencial para techos de viga a la vista: permite pasar cables, aísla térmicamente y previene que los clavos de la cubierta arruinen el cielo a la vista.',
         items: [
-          { id: 'tec_F01', nombre: 'Cielo volcanita 10mm + perfilería (horizontal)', unidad: 'm²', ufRef: 0.70 },
-          { id: 'tec_F02', nombre: 'Cielo machihembrado pino natural (bajo cubierta vista)', unidad: 'm²', ufRef: 1.20 },
-          { id: 'tec_F03', nombre: 'Cielo fibrocemento (exterior cubierto)', unidad: 'm²', ufRef: 0.65 },
-          { id: 'tec_F04', nombre: 'Empaste + pintura cielo (2 manos)', unidad: 'm²', ufRef: 0.38 },
+          // Placa Inferior (Cielo)
+          { id: 'tec_F01', nombre: 'PLACA 1 (Cielo Viga a la Vista): Terciado ranurado', desc: 'Se instala sobre la viga. Acabado estético tipo tabla (Cantería 9cm o 5cm).', unidad: 'm²', ufRef: 0.90 },
+          { id: 'tec_F02', nombre: 'PLACA 1 (Cielo Viga a la Vista): Machihembrado Pino', desc: 'Se instala sobre la viga. Estilo de madera clásico y cálido.', unidad: 'm²', ufRef: 1.15 },
+          { id: 'tec_F03', nombre: 'CIELO TRADICIONAL (Bajo cerchas): Volcanita RH / Fibro', desc: 'Se cuelga de las cerchas. Cielo cerrado liso e invisible estructuralmente.', unidad: 'm²', ufRef: 0.85 },
+          
+          // Costaneras (Crean la cámara de aire)
+          { id: 'tec_F04', nombre: 'Costaneras pino 2x1" (Separadores)', desc: 'Crea la cámara de aire mínima sobre la placa de cielo para pasar cables y proteger de los clavos.', unidad: 'm²', ufRef: 0.30 },
+          { id: 'tec_F05', nombre: 'Costaneras pino 2x2" / 2x3" (Estructurales)', desc: 'Cámara más ancha para aislación gruesa o para estructurar cubiertas metálicas.', unidad: 'm²', ufRef: 0.40 },
+          
+          // Aislación y Barreras
+          { id: 'tec_F06', nombre: 'Aislación: Lana mineral/vidrio (80/100mm)', desc: 'Control térmico y acústico (ruido de lluvia). Instalada en la cámara.', unidad: 'm²', ufRef: 0.45 },
+          { id: 'tec_F07', nombre: 'Aislación: Espuma poliuretano proyectado', desc: 'Aislación premium monolítica. Elimina completamente condensación y puentes térmicos.', unidad: 'm²', ufRef: 0.95 },
+          { id: 'tec_F08', nombre: 'Barrera de Vapor (Polietileno 0.15mm)', desc: 'Va en la cara cálida (sobre la placa cielo) para que el vapor interior no moje la aislación.', unidad: 'm²', ufRef: 0.12 },
+          { id: 'tec_F09', nombre: 'Barrera Hidrófuga Respirable (Tyvek)', desc: 'Va bajo la placa superior. Impide paso de agua exterior, deja salir humedad interior.', unidad: 'm²', ufRef: 0.20 },
+
+          // Placa Superior (Base de Cubierta)
+          { id: 'tec_F10', nombre: 'PLACA 2 (Base Cubierta): OSB 11.1mm', desc: 'Sustrato liso final sobre las costaneras. Requerido para recibir tejuelas asfálticas.', unidad: 'm²', ufRef: 0.50 },
+          { id: 'tec_F11', nombre: 'PLACA 2 (Base Cubierta): OSB 15.1mm', desc: 'Mayor exigencia para luces más anchas o techos que necesiten ser transitables.', unidad: 'm²', ufRef: 0.65 },
+          { id: 'tec_F12', nombre: 'Fieltro asfáltico 15 lbs (Membrana Base)', desc: 'Última línea de defensa impermeabilizante bajo la cubierta final.', unidad: 'm²', ufRef: 0.15 },
         ],
       },
-    ],
+
+      {
+        id: 'tec_G',
+        nombre: 'Material de Cubierta Exterior',
+        desc: 'La piel final del techo expuesta a la intemperie. La elección afecta el peso, la durabilidad y la estética.',
+        items: [
+          { id: 'tec_G01', nombre: 'Tejuela asfáltica 3 lengüetas estándar', desc: 'Excelente relación precio/calidad. Se fija con 4 a 6 clavos terranos por palmeta.', unidad: 'm²', ufRef: 0.95 },
+          { id: 'tec_G02', nombre: 'Tejuela asfáltica arquitectónica laminada', desc: 'Apariencia de alta definición, mayor relieve y máxima resistencia a vientos fuertes.', unidad: 'm²', ufRef: 1.55 },
+          { id: 'tec_G03', nombre: 'Panel continuo Zinc-Alum PV4/PV6', desc: 'Planchas a medida (sin uniones transversales). Ideal para pendientes muy bajas (estilo mediterráneo).', unidad: 'm²', ufRef: 0.90 },
+          { id: 'tec_G04', nombre: 'Teja metálica estampada gravillada', desc: 'Look de teja colonial chilena pero con un peso 8 veces menor. Larga vida útil.', unidad: 'm²', ufRef: 1.45 },
+          { id: 'tec_G05', nombre: 'Teja de arcilla o cemento tradicional', desc: 'Máxima durabilidad y aislación térmica natural. Requiere estructura reforzada por su alto peso.', unidad: 'm²', ufRef: 2.25 },
+          { id: 'tec_G06', nombre: 'Policarbonato alveolar 6mm/8mm (Terrazas)', desc: 'Permite luz natural. Incluye sistema completo de perfiles H (unión) y U (sellado bordes).', unidad: 'm²', ufRef: 0.95 },
+          { id: 'tec_G07', nombre: 'Policarbonato sólido liso 4mm (Terrazas)', desc: 'Estética de vidrio templado, bloquea radiación UV y es altamente resistente al granizo e impactos.', unidad: 'm²', ufRef: 1.75 },
+        ],
+      },
+
+      {
+        id: 'tec_H',
+        nombre: 'Hojalatería, Evacuación de Aguas Lluvias y Remates',
+        desc: 'Puntos críticos para evitar filtraciones y controlar el flujo de agua hacia el suelo.',
+        items: [
+          { id: 'tec_H01', nombre: 'Cumbrera tejuela asfáltica (Caballete armado)', desc: 'Remate superior fabricado a partir de la misma tejuela asfáltica para consistencia visual.', unidad: 'ml', ufRef: 0.35 },
+          { id: 'tec_H02', nombre: 'Cumbrera metálica con ventilación cruzada', desc: 'Posee un espaciador pasivo que permite evacuar el vapor caliente del entretecho.', unidad: 'ml', ufRef: 0.50 },
+          { id: 'tec_H03', nombre: 'Forros ocultos limahoyas/limatesas', desc: 'Canales de hojalata galvanizada instalados bajo la cubierta en intersecciones de techos en L o faldones.', unidad: 'ml', ufRef: 0.40 },
+          { id: 'tec_H04', nombre: 'Manto pasatecho o faldón para ductos', desc: 'Sello impermeable de hojalata y silicona alta temperatura para salidas redondas de cañones o ventilaciones.', unidad: 'ud', ufRef: 0.55 },
+          { id: 'tec_H05', nombre: 'Corta goteras perimetral', desc: 'Moldura metálica bajo el fieltro que aleja la gota del borde de la madera para evitar pudrición.', unidad: 'ml', ufRef: 0.20 },
+          { id: 'tec_H06', nombre: 'Canaleta de caída PVC (Estándar/Colonial)', desc: 'Sistema modular fácil de mantener, no se oxida. Incluye soportes, esquinas y embudos de caída.', unidad: 'ml', ufRef: 0.35 },
+          { id: 'tec_H07', nombre: 'Canaleta oculta Zinc-Alum continua', desc: 'Fabricada a medida sin cortes. Estética limpia y minimalista, previene filtraciones en uniones.', unidad: 'ml', ufRef: 0.60 },
+          { id: 'tec_H08', nombre: 'Bajada de aguas lluvias (PVC o Metálica)', desc: 'Tubo vertical (ø75/100mm) anclado al pilar o muro para conducir el agua al suelo sin salpicar.', unidad: 'ml', ufRef: 0.25 },
+          { id: 'tec_H09', nombre: 'Cadena estética de drenaje pluvial', desc: 'Alternativa visual (Acero/Cobre) a la bajada plástica. El agua escurre por los eslabones.', unidad: 'ml', ufRef: 0.70 },
+          { id: 'tec_H10', nombre: 'Cámara decantadora de piso y drenaje', desc: 'Receptáculo a nivel de suelo para recibir la bajada y conectar a red de aguas lluvias o drenaje francés.', unidad: 'ud', ufRef: 1.60 },
+        ],
+      },
+
+      {
+        id: 'tec_I',
+        nombre: 'Terminaciones, Tratamientos y Electricidad (Cobertizos)',
+        desc: 'Cierres finales, protección de materiales a la intemperie y funcionalidad eléctrica para uso exterior.',
+        items: [
+          { id: 'tec_I01', nombre: 'Tratamiento maderas (Impregnante + Barniz UV)', desc: 'Doble protección contra hongos, humedad, termitas y deterioro por radiación solar.', unidad: 'm²', ufRef: 0.30 },
+          { id: 'tec_I02', nombre: 'Tapacán perimetral y Cierre de aleros', desc: 'Madera de 1x8" o placa de Fibrocemento que oculta las cabezas de vigas y evita anidación de pájaros.', unidad: 'ml', ufRef: 0.35 },
+          { id: 'tec_I03', nombre: 'Canalización eléctrica embutida', desc: 'Uso de tubo corrugado ignífugo, cableado totalmente oculto en la cámara de aire del cielo.', unidad: 'ml', ufRef: 0.45 },
+          { id: 'tec_I04', nombre: 'Canalización eléctrica exterior a la vista', desc: 'Tubería de acero EMT rígida para estilo industrial o conduit plástico de alta resistencia a golpes.', unidad: 'ml', ufRef: 0.40 },
+          { id: 'tec_I05', nombre: 'Centro iluminación + Spot LED embutido exterior', desc: 'Perforación exacta en cielo, cableado THHN y luminaria con protección IP65 contra agua.', unidad: 'pto', ufRef: 1.45 },
+          { id: 'tec_I06', nombre: 'Centro de enchufes e interruptores estancos', desc: 'Artefactos eléctricos con tapa protectora (IP54/IP65) seguros contra lluvia y humedad ambiente.', unidad: 'pto', ufRef: 1.65 },
+          { id: 'tec_I07', nombre: 'Instalación de ventilador de techo o calefactor', desc: 'Refuerzo estructural especial en viga central y línea eléctrica de fuerza para confort.', unidad: 'ud', ufRef: 1.20 },
+        ]
+      }
+    ]
   },
-
-
   // ══════════════════════════════════════════════════════════════════════════
   // 7. MUROS PERIMETRALES
   // ══════════════════════════════════════════════════════════════════════════

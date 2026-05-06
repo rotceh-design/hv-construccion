@@ -1,269 +1,173 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  ChevronRight, Check, ArrowRight, Shield, Lock, Layers, Zap, 
-  Droplets, Paintbrush, Box, Cpu, AlertTriangle, Trash2, BookOpen, Ruler 
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  ChevronRight, Check, ArrowRight, Shield, Layers, Zap,
+  Droplets, Paintbrush, Box, Trash2, Eye,
+  Home, Bath, ChevronLeft, Info, Triangle
 } from 'lucide-react';
 import { PROYECTOS_DATA, UF_VALOR } from '../../data/serviciosData';
 import { fmt, fmtUF, BackBtn } from './Cotizadorpage';
 
-// ─── ESTILOS BRUTALISTAS ARQUITECTÓNICOS MEJORADOS ──────────────────────────────
-const ARCH_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap');
-
-  .arch-font-head { font-family: 'Rajdhani', sans-serif; }
-  .arch-font-mono { font-family: 'JetBrains Mono', monospace; }
-
-  .arch-grid-bg {
-    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-position: center top;
-  }
-
-  /* Contenedor de Fases con scroll mejorado */
-  .arch-stage-nav { 
-    display: flex; 
-    gap: 8px; 
-    margin-bottom: 32px; 
-    overflow-x: auto; 
-    padding-bottom: 12px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--gold) transparent;
-  }
-  
-  .arch-stage-tab {
-    flex: 0 0 160px; 
-    background: #0a0a0a; 
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 14px; 
-    cursor: pointer; 
-    transition: all 0.3s; 
-    border-top: 4px solid transparent; 
-    opacity: 0.4;
-  }
-  .arch-stage-tab.completed { opacity: 1; border-top-color: #2ecc71; background: rgba(46,204,113,0.05); }
-  .arch-stage-tab.active { opacity: 1; border-color: var(--gold); border-top-color: var(--gold); background: rgba(255,207,64,0.05); }
-  .arch-stage-tab.locked { cursor: not-allowed; filter: grayscale(1); opacity: 0.2; }
-
-  .arch-step-container {
-    border-left: 2px dashed rgba(255,207,64,0.2); 
-    margin-left: 20px; 
-    padding-left: 30px; 
-    padding-bottom: 40px; 
-    position: relative;
-    animation: fadeIn 0.4s ease-out forwards;
-  }
-  .arch-step-container:last-child { border-left-color: transparent; }
-
-  .arch-step-marker {
-    position: absolute; left: -21px; top: 0; width: 40px; height: 40px; background: #080808; border: 2px solid rgba(255,255,255,0.1);
-    display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 16px;
-    color: var(--text3); transition: all 0.3s ease; transform: rotate(45deg);
-  }
-  .arch-step-marker > div { transform: rotate(-45deg); }
-  .arch-step-container.active .arch-step-marker { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 15px rgba(255, 207, 64, 0.2); }
-  .arch-step-container.completed .arch-step-marker { background: var(--gold); border-color: var(--gold); color: #000; }
-
-  .arch-card {
-    background: #0d0d0d; border: 1px solid rgba(255,255,255,0.1); padding: 20px; cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden;
-    height: 100%; display: flex; flexDirection: column;
-  }
-  .arch-card:hover { border-color: var(--gold); transform: translateY(-2px); }
-  .arch-card.selected { border-color: var(--gold); background: rgba(255,207,64,0.03); box-shadow: inset 0 0 20px rgba(255,207,64,0.05); }
-
-  .arch-spec-tag {
-    display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    padding: 4px 8px; font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text2); margin-right: 6px; margin-bottom: 6px;
-  }
-
-  /* Ticket Sticky Corregido */
-  .arch-ticket { 
-    background: #050505; 
-    border: 1px solid var(--gold); 
-    padding: 24px; 
-    position: sticky; 
-    top: 100px;
-    z-index: 10;
-  }
-  
-  .arch-ticket-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
-
-  @media (max-width: 1024px) {
-    .arch-main-layout { grid-template-columns: 1fr !important; }
-    .arch-ticket { position: relative; top: 0; margin-top: 32px; }
-  }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-`;
-
-const ADVANCED_STAGES_SEGUNDO_PISO = [
-  {
-    id: 'stage_0', title: 'FASE 0: PREPARACIÓN Y NORMATIVA', icon: <Ruler size={16}/>,
-    phases: [
-      {
-        id: 'fase_muros_base', title: 'Sistema Constructivo de Soporte', icon: <Layers size={18}/>,
-        desc: 'Diagnóstico del primer piso para determinar si requiere refuerzo estructural exterior.',
-        options: [
-          { id: 'opt_mb_confinada', nombre: 'Albañilería Confinada 1er Piso', itemIds: [], desc: 'Soporta directamente la estructura.', specs: ['Apto Directo'], implication: 'Permite empalmar el entrepiso a las cadenas existentes.' },
-          { id: 'opt_mb_refuerzo', nombre: 'Requiere Refuerzo (Adobe / Tabique Antiguo)', itemIds: ['sp_A06', 'sp_A05'], desc: 'Se cotizan pilares y cadenas nuevas para soportar el 2do piso sin tocar los muros viejos.', specs: ['Exoesqueleto'], implication: 'Asegura estabilidad estructural independiente del estado del primer piso.' }
-        ]
-      },
-      {
-        id: 'fase_tablero', title: 'Capacidad Tablero Eléctrico', icon: <Zap size={18}/>,
-        desc: 'Evaluación de la matriz actual para las nuevas cargas.',
-        options: [
-          { id: 'opt_tab_ok', nombre: 'Tablero Actual Apto (Solo Sub-tablero)', itemIds: ['sp_H01', 'sp_H02'], desc: 'Se instala tablero derivado y alimentador.', specs: ['Sub-Tablero DIN'], implication: 'El cableado general de la casa se mantiene.' },
-          { id: 'opt_tab_new', nombre: 'Normalización y Cambio Matriz', itemIds: ['ig_A01', 'ig_A08'], desc: 'Cambio de tablero general y puesta a tierra.', specs: ['Norma SEC'], implication: 'Garantiza que no saltarán los automáticos al encender equipos en el nuevo piso.' }
-        ]
-      }
-    ]
+// ─── CONFIGURACIÓN DINÁMICA DE DIMENSIONES ────────────────────────────────
+const CATEGORY_CONFIG = {
+  segundos_pisos: {
+    inputs: [
+      { key: 'largo', label: 'LARGO TOTAL', step: 0.5, unit: 'm', def: 6 },
+      { key: 'ancho', label: 'ANCHO TOTAL', step: 0.5, unit: 'm', def: 4 },
+      { key: 'altoP2', label: 'ALTO PISO 2', step: 0.1, unit: 'm', def: 2.4 }
+    ],
+    calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: (d.largo * d.ancho * 0.15), ud: 1 })
   },
-  {
-    id: 'stage_1', title: 'FASE 1: OBRA GRUESA (PISOS Y MUROS)', icon: <Box size={16}/>,
-    phases: [
-      {
-        id: 'fase_entrepiso', title: 'Sistema de Entrepiso', icon: <Layers size={18}/>,
-        desc: 'La losa o entramado que dividirá los pisos. Define rigidez acústica y carga admisible.',
-        options: [
-          { id: 'opt_ep_losa', nombre: 'Losa Hormigón Armado H25', itemIds: ['sp_A01', 'sp_A10'], desc: 'Máxima aislación acústica y rigidez.', specs: ['H25 + Enfierradura'], implication: 'Soporta cualquier tipo de revestimiento y muros de albañilería en el 2do piso.' },
-          { id: 'opt_ep_metalcon', nombre: 'Entramado Metalcon 200mm + OSB', itemIds: ['sp_A04', 'sp_B06'], desc: 'Construcción seca, liviana y rápida.', specs: ['Metalcon + OSB 18mm'], implication: 'Estructura liviana. Recomendable para terminaciones de piso flotante o vinílico.' },
-          { id: 'opt_ep_madera', nombre: 'Entramado Madera Pino Seco', itemIds: ['sp_A03', 'sp_B06'], desc: 'Opción tradicional con buena flexibilidad térmica.', specs: ['Pino Seco'], implication: 'Eficiente y cálido, requiere cadeneteado estricto para evitar crujidos.' }
-        ]
-      },
-      {
-        id: 'fase_muros_vert', title: 'Muros Perimetrales (Estructura)', icon: <Shield size={18}/>,
-        desc: 'Impacta la eficiencia térmica y el tipo de aislación a utilizar.',
-        options: [
-          { id: 'opt_mv_metalcon', nombre: 'Tabique Estructural Metalcon', itemIds: ['sp_B03', 'sp_B07'], desc: 'Muros perfectamente rectos, inmunes a termitas.', specs: ['Metalcon 89mm'], implication: 'El puente térmico del acero exige instalación precisa de barreras de humedad.' },
-          { id: 'opt_mv_madera', nombre: 'Madera Pino 2x4" + Volcanita', itemIds: ['sp_B05', 'sp_B07'], desc: 'Muros de madera estructural.', specs: ['Pino 2x4"'], implication: 'Mejor comportamiento térmico natural para zonas muy frías.' },
-          { id: 'opt_mv_ladrillo', nombre: 'Albañilería Ladrillo (Solo si hay Losa)', itemIds: ['sp_B01', 'sp_B08'], desc: 'Muro sólido, requiere Losa H25 en la fase anterior.', specs: ['Ladrillo Fiscal'], implication: 'Gran inercia térmica, excelente aislación acústica exterior.' }
-        ]
-      }
-    ]
+  ampliaciones: {
+    inputs: [
+      { key: 'largo', label: 'LARGO AMPLIACIÓN', step: 0.5, unit: 'm', def: 5 },
+      { key: 'ancho', label: 'ANCHO AMPLIACIÓN', step: 0.5, unit: 'm', def: 3 },
+      { key: 'alto', label: 'ALTO MUROS', step: 0.1, unit: 'm', def: 2.4 }
+    ],
+    calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: (d.largo * d.ancho * 0.10), ud: 1 })
   },
-  {
-    id: 'stage_2', title: 'FASE 2: TECHUMBRE Y REVESTIMIENTOS', icon: <Droplets size={16}/>,
-    phases: [
-      {
-        id: 'fase_cubierta', title: 'Sistema de Techumbre Completo', icon: <Shield size={18}/>,
-        desc: 'Define estética, sonido de la lluvia y vida útil de la casa.',
-        options: [
-          { id: 'opt_cub_teja', nombre: 'Teja Asfáltica (Alta Gama)', itemIds: ['sp_C01', 'sp_C06', 'sp_C10'], desc: 'Cerchas madera, OSB continuo y teja. Silencioso.', specs: ['OSB + Teja Asfáltica'], implication: 'Máxima aislación contra el ruido de lluvia y estética premium.' },
-          { id: 'opt_cub_zinc', nombre: 'Zinc Alum PV4 Prepintado', itemIds: ['sp_C02', 'sp_C07', 'sp_C10'], desc: 'Cerchas metálicas, costaneras y cubierta PV4.', specs: ['PV4 Prepintado'], implication: 'Bajo peso estructural, rápida evacuación de aguas lluvias.' },
-          { id: 'opt_cub_panel', nombre: 'Panel Sandwich PUR 40mm', itemIds: ['sp_C02', 'tec_D05', 'sp_C10'], desc: 'Aislación de poliuretano inyectada directamente en el techo.', specs: ['Alta Eficiencia Térmica'], implication: 'Garantiza la máxima retención de calor en invierno.' }
-        ]
-      },
-      {
-        id: 'fase_rev_exterior', title: 'Piel Exterior (Fachada)', icon: <Paintbrush size={18}/>,
-        desc: 'Protección climática y acabado final de la ampliación.',
-        options: [
-          { id: 'opt_rev_siding', nombre: 'Siding PVC / Fibrocemento', itemIds: ['sp_B09', 'sp_B10'], desc: 'Incluye membrana hidrófuga de base.', specs: ['Siding'], implication: 'Libre de mantención (PVC) y excelente corte de humedad lateral.' },
-          { id: 'opt_rev_estuco', nombre: 'Estuco Proyectado / EIFS', itemIds: ['sp_B09', 'sp_B11'], desc: 'Terminación sólida tipo hormigón.', specs: ['Estuco sobre malla'], implication: 'Apariencia sólida y continua, sin uniones visibles.' }
-        ]
-      }
-    ]
+  cobertizos: {
+    inputs: [
+      { key: 'largo', label: 'LARGO COBERTIZO', step: 0.5, unit: 'm', def: 5 },
+      { key: 'ancho', label: 'ANCHO COBERTIZO', step: 0.5, unit: 'm', def: 3 }
+    ],
+    calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: 0, ud: 1 })
   },
-  {
-    id: 'stage_3', title: 'FASE 3: TERMINACIONES Y BAÑOS', icon: <Check size={16}/>,
-    phases: [
-      {
-        id: 'fase_pisos_int', title: 'Pavimentos Interiores', icon: <Layers size={18}/>,
-        desc: 'Recubrimiento principal para dormitorios y pasillos.',
-        options: [
-          { id: 'opt_piso_flotante', nombre: 'Piso Flotante AC4 / AC5', itemIds: ['sp_F01', 'sp_F08'], desc: 'Instalación flotada con manta niveladora y zócalos MDF.', specs: ['Cálido al pie'], implication: 'Solución rápida y acústicamente agradable para descanso.' },
-          { id: 'opt_piso_porcelanato', nombre: 'Porcelanato 60x60', itemIds: ['sp_F10', 'sp_F04', 'sp_F08'], desc: 'Requiere subbase nivelante incluída. Extrema durabilidad.', specs: ['Alto Tráfico'], implication: 'Añade peso a la estructura pero garantiza vida útil indefinida.' }
-        ]
-      },
-      {
-        id: 'fase_bano_tipo', title: 'Configuración Baño Segundo Piso', icon: <Droplets size={18}/>,
-        desc: 'Nivel de terminación y artefactos para la zona húmeda.',
-        options: [
-          { id: 'opt_bano_std', nombre: 'Baño Completo Estándar', itemIds: ['sp_K01', 'sp_K03', 'sp_K08', 'sp_K16'], desc: 'WC tradicional, tina acrílica, lavamanos cerámico, cerámica muros.', specs: ['Cerámica + Tina'], implication: 'Solución probada, fácil mantención y repuestos económicos.' },
-          { id: 'opt_bano_prem', nombre: 'Baño Premium / Shower', itemIds: ['sp_K02', 'sp_K04', 'sp_K07', 'sp_K09', 'sp_K17'], desc: 'WC suspendido, shower door, porcelanato muro, grifería empotrada.', specs: ['Porcelanato + Shower'], implication: 'Look de hotel. Requiere impermeabilización estricta incluida en el costo.' }
-        ]
-      }
-    ]
+  techos: {
+    inputs: [
+      { key: 'largo', label: 'LARGO TECHO', step: 0.5, unit: 'm', def: 6 },
+      { key: 'ancho', label: 'ANCHO (SALIENTE)', step: 0.5, unit: 'm', def: 4 }
+    ],
+    calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: 0, ud: 1 })
+  },
+  quinchos: {
+    inputs: [
+      { key: 'largoMeson', label: 'LARGO MESÓN', step: 0.5, unit: 'm', def: 3 },
+      { key: 'anchoMeson', label: 'FONDO MESÓN', step: 0.1, unit: 'm', def: 0.6 },
+      { key: 'largoTecho', label: 'LARGO COBERTIZO', step: 0.5, unit: 'm', def: 4 },
+      { key: 'anchoTecho', label: 'ANCHO COBERTIZO', step: 0.5, unit: 'm', def: 3 }
+    ],
+    calc: (d) => ({ m2: d.largoTecho * d.anchoTecho, ml: d.largoMeson, m3: 0, ud: 1 })
+  },
+  radiers: {
+    inputs: [
+      { key: 'largo', label: 'LARGO RADIER', step: 0.5, unit: 'm', def: 5 },
+      { key: 'ancho', label: 'ANCHO RADIER', step: 0.5, unit: 'm', def: 4 },
+      { key: 'espesor', label: 'ESPESOR', step: 0.05, unit: 'm', def: 0.10 }
+    ],
+    calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: (d.largo * d.ancho * d.espesor), ud: 1 })
+  },
+  muros_perimetrales: {
+    inputs: [
+      { key: 'largo', label: 'LARGO DEL MURO', step: 1.0, unit: 'm', def: 10 },
+      { key: 'alto', label: 'ALTO DEL MURO', step: 0.1, unit: 'm', def: 2.0 }
+    ],
+    calc: (d) => ({ m2: d.largo * d.alto, ml: d.largo, m3: (d.largo * d.alto * 0.15), ud: 1 })
+  },
+  default: {
+    inputs: [
+      { key: 'largo', label: 'LARGO', step: 0.5, unit: 'm', def: 5 },
+      { key: 'ancho', label: 'ANCHO', step: 0.5, unit: 'm', def: 4 }
+    ],
+    calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: 0, ud: 1 })
   }
-];
+};
 
-const SectionProyectos = ({ step, goStep, projCatId, setProjCatId, projSel, setProjSel, m2, setM2 }) => {
-  const isSegundoPiso = projCatId === 'segundos_pisos'; 
+// ─── COMPONENTE PRINCIPAL ───────────────────────────────────────────────────
+const SectionProyectos = ({ step, goStep, projCatId, setProjCatId, projSel, setProjSel }) => {
   const projCat = projCatId ? PROYECTOS_DATA[projCatId] : null;
-  const [activeStageIdx, setActiveStageIdx] = useState(0);
 
-  const catItemsMap = useMemo(() => {
-    if (!projCat) return {};
-    const map = {};
-    if (projCat.grupos) {
-      projCat.grupos.forEach(g => g.items.forEach(it => map[it.id] = { ...it, grupo: g.nombre }));
-    } else if (projCat.items) {
-      projCat.items.forEach(it => map[it.id] = it);
+  const [stageIdx, setStageIdx] = useState(0);
+  const [dims, setDims] = useState({});
+
+  // Inicializar dimensiones
+  useEffect(() => {
+    if (projCatId) {
+      const config = CATEGORY_CONFIG[projCatId] || CATEGORY_CONFIG.default;
+      const initialDims = {};
+      config.inputs.forEach(inp => initialDims[inp.key] = inp.def);
+      setDims(initialDims);
     }
-    if (PROYECTOS_DATA.instalaciones_generales) {
-      PROYECTOS_DATA.instalaciones_generales.grupos.forEach(g => g.items.forEach(it => map[it.id] = { ...it, grupo: g.nombre }));
-    }
-    const globalSearch = (id) => {
-       for (const cat in PROYECTOS_DATA) {
-         if (PROYECTOS_DATA[cat].grupos) {
-            for (const g of PROYECTOS_DATA[cat].grupos) {
-              const f = g.items.find(i => i.id === id);
-              if (f) return {...f, grupo: g.nombre};
-            }
-         }
-       }
-       return null;
-    };
-    return { get: (id) => map[id] || globalSearch(id) };
+  }, [projCatId]);
+
+  const catConfig = CATEGORY_CONFIG[projCatId] || CATEGORY_CONFIG.default;
+  const metrics = catConfig.calc(dims); // Retorna { m2, ml, m3, ud }
+
+  // ─── GENERADOR DINÁMICO DE FASES DESDE LA BASE DE DATOS MAESTRA ────────────
+  // Transformamos los grupos reales de PROYECTOS_DATA en pestañas visuales.
+  // Esto garantiza que el 100% de la biblioteca esté disponible y detallada.
+  const stages = useMemo(() => {
+    if (!projCat || !projCat.grupos) return [];
+    return projCat.grupos.map((grupo, idx) => ({
+      id: `stage_${idx}`,
+      phase: `FASE ${String(idx + 1).padStart(2, '0')}`,
+      title: grupo.nombre,
+      desc: grupo.desc || 'Selecciona todas las partidas técnicas requeridas para esta etapa.',
+      options: grupo.items
+    }));
   }, [projCat]);
 
-  const checkStageComplete = (stage) => stage.phases.every(phase => projSel[phase.id]);
+  // Total en UF sumando todo lo seleccionado según la métrica correspondiente
+  const totalUF = useMemo(() => {
+    let t = 0;
+    Object.values(projSel).forEach(it => {
+      let qty = 1;
+      if (it.unidad === 'm²') qty = metrics.m2 || 1;
+      else if (it.unidad === 'ml') qty = metrics.ml || 1;
+      else if (it.unidad === 'm³') qty = metrics.m3 || (metrics.m2 * 0.1) || 1;
+      else if (['ud', 'pt', 'gl', 'kg', 'mes', 'pto'].includes(it.unidad)) qty = metrics.ud || 1;
+      t += it.ufRef * qty;
+    });
+    return t;
+  }, [projSel, metrics]);
 
-  const getOptionCostoTotal = (itemIds) => {
-    return itemIds.reduce((sum, id) => {
-      const item = catItemsMap.get(id);
-      return sum + (item ? item.ufRef : 0);
-    }, 0);
+  const handlePickCat = (key) => {
+    setProjCatId(key);
+    setProjSel({});
+    setStageIdx(0);
+    goStep(2.5);
   };
 
-  const calculateTotalUF = () => {
-    let total = 0;
-    if (isSegundoPiso) {
-      ADVANCED_STAGES_SEGUNDO_PISO.forEach(stage => {
-        stage.phases.forEach(phase => {
-          const sel = projSel[phase.id];
-          if (sel) total += (getOptionCostoTotal(sel.itemIds) * m2);
-        });
-      });
-    } else {
-      Object.values(projSel).forEach(item => total += (item.ufRef * m2));
-    }
-    return total;
-  };
-
+  // ── PANTALLA 2: SELECCIÓN DE CATEGORÍA ─────────────────────────────────────
   if (step === 2) {
     return (
-      <div className="fade-up">
-        <style>{ARCH_CSS}</style>
+      <div className="animate-fade-in text-zinc-100 font-sans">
         <BackBtn onClick={() => goStep(1)}/>
-        <div style={{ marginBottom:48 }}>
-          <div style={{ fontSize:11, color:'var(--gold)', fontWeight:800, textTransform:'uppercase', letterSpacing:'.18em', marginBottom:12 }}>Ingeniería & Proyectos</div>
-          <h1 className="arch-font-head" style={{ fontWeight:900, fontSize:'clamp(36px,5vw,68px)', textTransform:'uppercase', lineHeight:.9, marginBottom:14 }}>
-            Elige tu<br/><em style={{ color:'var(--gold)', fontStyle:'normal' }}>Obra Mayor</em>
+
+        <div className="mb-14">
+          <div className="text-[10px] text-yellow-500 tracking-widest mb-3 uppercase font-mono font-bold">
+            /// INGENIERÍA Y PROYECTOS
+          </div>
+          <h1 className="font-black text-5xl md:text-7xl uppercase leading-none mb-5 tracking-tight text-white">
+            ELIGE TU<br/><span className="text-yellow-600">OBRA</span>
           </h1>
-          <p style={{ color:'var(--text3)', fontSize:14, maxWidth:520 }}>
-            Configurador arquitectónico enlazado directamente a nuestra base de datos técnica. Selecciona partidas exactas y obtén un presupuesto al milímetro.
+          <p className="text-zinc-400 text-sm max-w-xl leading-relaxed">
+            Catálogo maestro de partidas. Selecciona la categoría para dimensionar y acceder al desglose técnico detallado de nuestra base de datos.
           </p>
         </div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:20 }}>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {Object.entries(PROYECTOS_DATA).filter(([k]) => k !== 'instalaciones_generales').map(([key, cat], i) => (
-            <button key={key} className="arch-card arch-grid-bg fade-up" style={{ animationDelay:`${i*.1}s`, borderRadius: '12px', padding: '32px 28px', textAlign: 'left' }}
-              onClick={() => { setProjCatId(key); setProjSel({}); setActiveStageIdx(0); goStep(2.5); }}>
-              <div style={{ fontSize:36, marginBottom:12 }}>{cat.emoji}</div>
-              <h3 className="arch-font-head" style={{ fontWeight:800, fontSize:28, textTransform:'uppercase', color:'#fff', lineHeight:1, marginBottom:8 }}>{cat.label}</h3>
-              <p style={{ fontSize:12, color:'var(--text3)', lineHeight:1.6, marginBottom:16 }}>{cat.desc}</p>
-              <div className="arch-font-mono" style={{ fontSize:11, color:'var(--gold)', fontWeight:700, display:'flex', alignItems:'center', gap:6 }}>
-                INICIAR CONFIGURADOR <ArrowRight size={13}/>
+            <button key={key} 
+                    className="group bg-zinc-950 border border-zinc-800 hover:border-yellow-600 transition-all cursor-pointer relative overflow-hidden flex flex-col text-left rounded-lg shadow-md"
+                    onClick={() => handlePickCat(key)}>
+              <div className="h-40 bg-zinc-900 w-full relative overflow-hidden flex items-center justify-center">
+                <span className="text-6xl opacity-20 group-hover:opacity-40 transition-opacity group-hover:scale-110 duration-500">{cat.emoji}</span>
+              </div>
+              <div className="p-6 flex flex-col flex-1">
+                <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-1 border mb-3 w-fit border-yellow-500/40 text-yellow-500 bg-yellow-900/10">
+                  CONFIGURADOR TÉCNICO DETALLADO
+                </span>
+                <h3 className="font-bold text-2xl uppercase text-white leading-tight mb-2">
+                  {cat.label}
+                </h3>
+                <p className="text-xs text-zinc-400 leading-relaxed mb-4 flex-1">
+                  {cat.desc}
+                </p>
+                <div className="flex justify-between items-center border-t border-zinc-800 pt-4 mt-auto">
+                  <div className="font-bold text-sm text-white flex items-center gap-2 tracking-wide">
+                    INICIAR PROYECTO <ArrowRight size={14} className="text-yellow-500 group-hover:translate-x-1 transition-transform"/>
+                  </div>
+                </div>
               </div>
             </button>
           ))}
@@ -272,148 +176,261 @@ const SectionProyectos = ({ step, goStep, projCatId, setProjCatId, projSel, setP
     );
   }
 
+  // ── PANTALLA 2.5: CONFIGURADOR TÉCNICO DETALLADO ─────────────────────────────
   if (step === 2.5 && projCat) {
-    const isCurrentStageDone = isSegundoPiso ? checkStageComplete(ADVANCED_STAGES_SEGUNDO_PISO[activeStageIdx]) : true;
-    const totalUF = calculateTotalUF();
+    const allTicket = Object.values(projSel).map(sel => {
+      let qty = 1;
+      if (sel.unidad === 'm²') qty = metrics.m2 || 1;
+      else if (sel.unidad === 'ml') qty = metrics.ml || 1;
+      else if (sel.unidad === 'm³') qty = metrics.m3 || (metrics.m2 * 0.1) || 1;
+      else if (['ud', 'pt', 'gl', 'kg', 'mes', 'pto'].includes(sel.unidad)) qty = metrics.ud || 1;
+      return { ...sel, cost: sel.ufRef * qty };
+    });
 
     return (
-      <div className="fade-up arch-root" style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        <style>{ARCH_CSS}</style>
+      <div className="max-w-[1600px] mx-auto animate-fade-in font-sans text-zinc-100">
         <BackBtn onClick={() => { goStep(2); setProjCatId(null); setProjSel({}); }}/>
-        
-        {/* HEADER */}
-        <div style={{ display:'flex', gap:24, alignItems:'flex-start', flexWrap:'wrap', marginBottom:32 }}>
-          <div style={{ flex:1, minWidth:280 }}>
-            <div className="arch-font-mono" style={{ fontSize:11, color:'var(--text3)', fontWeight:700, letterSpacing:'.1em', marginBottom:6 }}>
-              {projCat.emoji} SECUENCIA ESTRUCTURAL // {projCat.label.toUpperCase()}
+
+        {/* HEADER Y DIMENSIONES DINÁMICAS */}
+        <div className="flex flex-wrap gap-8 items-end mb-10">
+          <div className="flex-1 min-w-[280px]">
+            <div className="font-mono text-[10px] text-yellow-500 tracking-widest mb-2">
+              {projCat.emoji} CALCULADORA ARQUITECTÓNICA // {projCat.label.toUpperCase()}
             </div>
-            <h1 className="arch-font-head" style={{ fontWeight:800, fontSize:'clamp(32px,4vw,56px)', textTransform:'uppercase', lineHeight:.9, marginBottom:12, color:'#fff' }}>
-              Configurador <span style={{ color:'var(--gold)' }}>{isSegundoPiso ? 'Avanzado' : 'Técnico'}</span>
+            <h1 className="font-black text-4xl md:text-6xl uppercase text-white leading-none tracking-tight">
+              AJUSTA LAS<br/><span className="text-yellow-600">MEDIDAS</span>
             </h1>
           </div>
-          <div style={{ background:'#0f0f0f', border:'1px solid rgba(255,255,255,0.1)', padding:24, minWidth:260 }}>
-            <div className="arch-font-mono" style={{ fontSize:10, color:'var(--gold)', fontWeight:700, textTransform:'uppercase', marginBottom:12 }}>Superficie Base [ M² ]</div>
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              <button onClick={() => setM2(p => Math.max(10,p-5))} style={{ width:40, height:40, background:'#1a1a1a', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', cursor:'pointer' }}>-</button>
-              <input type="number" value={m2} readOnly style={{ flex:1, height:40, background:'#000', border:'1px solid var(--gold)', color:'var(--gold)', fontSize:20, fontWeight:800, textAlign:'center', outline:'none' }}/>
-              <button onClick={() => setM2(p => Math.min(500,p+5))} style={{ width:40, height:40, background:'#1a1a1a', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', cursor:'pointer' }}>+</button>
+
+          <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-lg flex flex-wrap gap-6 items-center shadow-xl">
+            {catConfig.inputs.map(({ key, label, step, unit }) => (
+              <div key={key} className="flex flex-col">
+                <label className="font-mono text-[9px] text-zinc-500 mb-1 tracking-widest">{label} ({unit})</label>
+                <input type="number" min={0.1} step={step} 
+                       className="bg-transparent border-b border-zinc-700 text-yellow-500 font-mono text-xl font-bold w-24 text-center outline-none focus:border-yellow-500 transition-colors pb-1"
+                       value={dims[key] || ''}
+                       onChange={e => setDims(d => ({ ...d, [key]: Math.max(0.1, Number(e.target.value)) }))}/>
+              </div>
+            ))}
+            
+            <div className="w-[1px] h-10 bg-zinc-800 hidden md:block"></div>
+            
+            <div className="flex gap-6 flex-wrap">
+              <div>
+                <div className="font-mono text-[9px] text-zinc-400 mb-1 tracking-widest">ÁREA (m²)</div>
+                <div className="font-mono text-2xl font-bold text-white">{metrics.m2?.toFixed(1)}</div>
+              </div>
+              {metrics.ml > 0 && (
+                <div>
+                  <div className="font-mono text-[9px] text-zinc-400 mb-1 tracking-widest">PERÍMETRO (ml)</div>
+                  <div className="font-mono text-2xl font-bold text-white">{metrics.ml?.toFixed(1)}</div>
+                </div>
+              )}
+              {metrics.m3 > 0 && (
+                <div>
+                  <div className="font-mono text-[9px] text-zinc-400 mb-1 tracking-widest">VOLUMEN (m³)</div>
+                  <div className="font-mono text-2xl font-bold text-white">{metrics.m3?.toFixed(1)}</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* NAV FASES */}
-        {isSegundoPiso && (
-          <div className="arch-stage-nav">
-            {ADVANCED_STAGES_SEGUNDO_PISO.map((stage, idx) => (
-              <div key={stage.id} className={`arch-stage-tab ${idx === activeStageIdx ? 'active' : ''} ${checkStageComplete(stage) ? 'completed' : ''}`}
-                   onClick={() => { if (idx <= activeStageIdx || checkStageComplete(ADVANCED_STAGES_SEGUNDO_PISO[idx-1])) setActiveStageIdx(idx); }}>
-                <div className="arch-font-mono" style={{ fontSize:10, color: idx === activeStageIdx ? 'var(--gold)' : '#555' }}>FASE 0{idx}</div>
-                <div className="arch-font-head" style={{ fontSize:13, fontWeight:700, color:'#fff', textTransform:'uppercase' }}>{stage.title.split(':')[1]}</div>
+        {/* NAVEGADOR DINÁMICO DE FASES (Lee la base de datos) */}
+        <div className="flex gap-0 mb-10 border border-zinc-800 overflow-x-auto scrollbar-hide rounded-md bg-zinc-950/50">
+          {stages.map((st, idx) => {
+            const active = idx === stageIdx;
+            // Se marca con check si hay al menos un ítem seleccionado en esta fase
+            const hasSelection = st.options.some(opt => projSel[opt.id]);
+            return (
+              <div key={st.id}
+                   className={`flex-none min-w-[150px] border-r border-zinc-800 p-4 cursor-pointer transition-all relative
+                              ${active ? 'bg-yellow-950/20 border-t-2 border-t-yellow-600 -mt-[1px] opacity-100' : 'opacity-40 hover:opacity-70'}
+                              ${hasSelection && !active ? 'bg-emerald-900/10 opacity-100' : ''}`}
+                   onClick={() => setStageIdx(idx)}>
+                <div className={`font-mono text-[9px] mb-1 tracking-widest ${active ? 'text-yellow-500' : 'text-zinc-500'}`}>
+                  {st.phase}
+                </div>
+                <div className={`font-bold text-xs uppercase ${active ? 'text-white' : 'text-zinc-400'}`}>
+                  {st.title}
+                </div>
+                {hasSelection && <Check size={14} className="absolute top-3 right-3 text-emerald-500" />}
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
 
-        {/* GRID PRINCIPAL */}
-        <div className="arch-main-layout" style={{ display:'grid', gridTemplateColumns:'1fr 380px', gap:40, alignItems:'start' }}>
-          
-          <div style={{ minWidth: 0 }}>
-            {isSegundoPiso ? (
-              ADVANCED_STAGES_SEGUNDO_PISO[activeStageIdx].phases.map((phase, idx) => (
-                <div key={phase.id} className="arch-step-container">
-                  <div className="arch-step-marker"><div>{idx + 1}</div></div>
-                  <div style={{ marginBottom: 20 }}>
-                    <h2 className="arch-font-head" style={{ fontSize:22, fontWeight:800, textTransform:'uppercase', color: '#fff', margin:0, display:'flex', gap:10, alignItems:'center' }}>
-                      <span style={{color:'var(--gold)'}}>{phase.icon}</span> {phase.title}
-                    </h2>
-                    <p style={{ fontSize:13, color:'var(--text3)', marginTop:4 }}>{phase.desc}</p>
+        {/* LAYOUT A 3 COLUMNAS */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px_340px] gap-8 items-start">
+
+          {/* COLUMNA 1: DESGLOSE DE PARTIDAS (SELECCIÓN MÚLTIPLE) */}
+          <div className="min-w-0">
+            {stages[stageIdx] && (
+              <div className="animate-fade-in">
+                <div className="flex gap-4 items-start mb-6">
+                  <div className="font-black text-6xl text-zinc-800/40 leading-none -mt-2 select-none">
+                    {String(stageIdx + 1).padStart(2,'0')}
                   </div>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))', gap:16 }}>
-                    {phase.options.map((opt) => {
-                      const sel = projSel[phase.id]?.id === opt.id;
-                      const cost = getOptionCostoTotal(opt.itemIds);
-                      return (
-                        <div key={opt.id} className={`arch-card ${sel ? 'selected' : ''}`} onClick={() => setProjSel(p => ({ ...p, [phase.id]: { ...opt, grupo: phase.title } })) }>
-                          <div style={{ display:'flex', justifyContent:'space-between', marginBottom:12 }}>
-                            <div className="arch-font-head" style={{ fontSize:18, fontWeight:700, color: sel ? 'var(--gold)' : '#fff' }}>{opt.nombre}</div>
-                            {sel && <Check size={18} color="var(--gold)" strokeWidth={3}/>}
-                          </div>
-                          <p style={{ fontSize:12, color:'var(--text2)', lineHeight:1.5, marginBottom:16, flex: 1 }}>{opt.desc}</p>
-                          <div style={{ borderTop:'1px solid rgba(255,255,255,0.05)', paddingTop:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                            <span className="arch-font-mono" style={{ fontSize:10, color:'#555' }}>INVERSIÓN REF.</span>
-                            <span className="arch-font-mono" style={{ fontSize:14, fontWeight:700, color: sel ? 'var(--gold)' : '#888' }}>+{fmtUF(cost)} <small>UF/m²</small></span>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div>
+                    <h2 className="font-black text-2xl uppercase text-white tracking-wide m-0">{stages[stageIdx].title}</h2>
+                    <p className="text-xs text-zinc-400 mt-1">{stages[stageIdx].desc}</p>
                   </div>
                 </div>
-              ))
-            ) : (
-              projCat.grupos.map((grupo) => (
-                <div key={grupo.id} style={{ marginBottom: 40 }}>
-                  <h3 className="arch-font-head" style={{ color:'var(--gold)', fontSize:20, textTransform:'uppercase', fontWeight:800, marginBottom:16 }}>{grupo.nombre}</h3>
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:12 }}>
-                    {grupo.items.map(it => {
-                      const sel = !!projSel[it.id];
-                      return (
-                        <div key={it.id} className={`arch-card ${sel ? 'selected' : ''}`} style={{ padding:'16px' }}
-                             onClick={() => setProjSel(p => { const n={...p}; if(n[it.id]) delete n[it.id]; else n[it.id]={...it, grupo:grupo.nombre}; return n; })}>
-                          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                            <span className="arch-font-head" style={{ fontSize:15, fontWeight:700, color: sel ? '#fff' : '#888' }}>{it.nombre}</span>
-                            <span className="arch-font-mono" style={{ fontSize:14, color: sel ? 'var(--gold)' : '#555' }}>{it.ufRef} UF</span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {stages[stageIdx].options.map((opt) => {
+                    const sel = !!projSel[opt.id];
+                    
+                    return (
+                      <div key={opt.id} 
+                           className={`group flex flex-col bg-zinc-950 border transition-all cursor-pointer rounded-md relative shadow-sm
+                                      ${sel ? 'border-yellow-500 bg-yellow-950/10 ring-1 ring-yellow-500' : 'border-zinc-800 hover:border-zinc-500'}`}
+                           onClick={() => setProjSel(p => { 
+                             const n = {...p}; 
+                             if (n[opt.id]) delete n[opt.id]; 
+                             else n[opt.id] = { ...opt, grupo: stages[stageIdx].title }; 
+                             return n; 
+                           })}>
+                        
+                        <div className="p-4 flex-1 flex flex-col">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className={`font-bold text-xs uppercase pr-6 leading-tight ${sel ? 'text-yellow-500' : 'text-white'}`}>
+                              {opt.nombre}
+                            </h3>
+                            {sel ? (
+                              <Check size={16} className="text-yellow-500 absolute top-4 right-4 flex-shrink-0"/>
+                            ) : (
+                              <div className="w-4 h-4 rounded border border-zinc-700 absolute top-4 right-4 flex-shrink-0"></div>
+                            )}
+                          </div>
+                          
+                          {opt.desc && <p className="text-[10px] text-zinc-400 leading-relaxed mb-4">{opt.desc}</p>}
+                          
+                          <div className="mt-auto pt-3 border-t border-zinc-800/60 flex justify-between items-center">
+                            <span className="font-mono text-[9px] bg-zinc-900 border border-zinc-800 px-2 py-1 rounded text-zinc-500 tracking-widest uppercase">
+                              {opt.unidad}
+                            </span>
+                            <span className={`font-mono text-[11px] font-bold ${sel ? 'text-yellow-500' : 'text-zinc-400'}`}>
+                              {opt.ufRef} UF / Base
+                            </span>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))
+              </div>
             )}
-            
-            {isSegundoPiso && activeStageIdx < ADVANCED_STAGES_SEGUNDO_PISO.length - 1 && (
-              <div style={{ textAlign:'right', marginTop: 32 }}>
-                <button disabled={!isCurrentStageDone} onClick={() => setActiveStageIdx(p => p + 1)}
-                        style={{ padding:'14px 32px', background: isCurrentStageDone ? '#fff' : '#222', color:'#000', border:'none', fontWeight:900, fontSize:13, cursor: isCurrentStageDone ? 'pointer' : 'not-allowed' }}>
-                  SIGUIENTE FASE <ArrowRight size={16} style={{display:'inline', marginLeft:8}}/>
+
+            {/* BOTONERÍA DE NAVEGACIÓN */}
+            <div className="flex justify-between mt-8 pt-8 border-t border-zinc-800">
+              {stageIdx > 0 ? (
+                <button className="flex items-center gap-2 font-bold text-xs uppercase px-6 py-3 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 rounded transition-colors"
+                        onClick={() => setStageIdx(s => s-1)}>
+                  <ChevronLeft size={16}/> ANTERIOR
                 </button>
-              </div>
-            )}
+              ) : <div></div>}
+              
+              {stageIdx < stages.length - 1 ? (
+                <button className="flex items-center gap-2 font-bold text-xs uppercase px-8 py-3 bg-white text-black hover:bg-yellow-500 hover:text-black rounded transition-colors" 
+                        onClick={() => setStageIdx(s => s+1)}>
+                  SIGUIENTE FASE <ArrowRight size={16}/>
+                </button>
+              ) : (
+                <button className="flex items-center gap-2 font-bold text-xs uppercase px-8 py-3 bg-yellow-600 text-black hover:bg-yellow-500 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        disabled={allTicket.length === 0}
+                        onClick={() => goStep(3)}>
+                  RESUMEN FINAL <ArrowRight size={16}/>
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* TICKET SIDEBAR */}
-          <div className="arch-ticket">
-            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:20 }}>
-              <Zap size={18} color="var(--gold)"/>
-              <div className="arch-font-head" style={{ fontSize:16, fontWeight:800, color:'#fff', textTransform:'uppercase' }}>Plano de Inversión</div>
-            </div>
-            
-            <div style={{ maxHeight: '350px', overflowY: 'auto', paddingRight: 8 }}>
-              {Object.values(projSel).map((sel, i) => (
-                <div key={i} className="arch-ticket-row">
-                  <div style={{ color:'#888', maxWidth: '70%' }}>
-                    <div style={{ fontSize:8, color:'var(--gold)' }}>{sel.grupo?.toUpperCase()}</div>
-                    {sel.nombre}
+          {/* COLUMNA 2: INFO EXTRA Y CONTEXTO MATEMÁTICO */}
+          <div className="sticky top-6 hidden lg:block">
+            <div className="bg-zinc-950 border border-zinc-800 p-5 rounded-md shadow-lg">
+              <div className="flex items-center gap-2 mb-4 border-b border-zinc-800 pb-3">
+                <Info size={16} className="text-yellow-500"/>
+                <span className="font-mono text-[10px] text-yellow-500 tracking-widest font-bold">INFO MOTOR HV</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 leading-relaxed mb-4">
+                Has habilitado el modo de selección detallada. Extraemos el desglose técnico directamente desde la base de datos maestra. Puedes seleccionar <strong>múltiples partidas</strong> dentro de cada fase. El motor multiplicará automáticamente el costo base por las cotas ingresadas en la parte superior.
+              </p>
+              
+              <div className="bg-zinc-900 border border-zinc-800 p-3 rounded text-[10px] text-zinc-300 font-mono mb-4 leading-relaxed">
+                Área Analizada: {metrics.m2.toFixed(1)} m²<br/>
+                Perímetro Activo: {metrics.ml?.toFixed(1)} ml<br/>
+                {metrics.m3 > 0 && <>Volumen en Obra: {metrics.m3.toFixed(1)} m³</>}
+              </div>
+
+              {/* Rango Referencial */}
+              {projCat.ufMin && (
+                <div className="bg-zinc-900 border border-zinc-800 p-4 rounded mt-4">
+                  <div className="font-mono text-[9px] text-zinc-500 tracking-widest mb-2 text-center">RANGO DE MERCADO (UF/m²)</div>
+                  <div className="flex justify-between items-center text-white font-bold text-lg">
+                    <span>{projCat.ufMin}</span>
+                    <div className="flex-1 h-px bg-zinc-800 mx-3 relative">
+                      <div className="absolute h-1 bg-yellow-600 w-1/3 top-[-1.5px] left-1/3 shadow-[0_0_8px_rgba(234,179,8,0.5)]"></div>
+                    </div>
+                    <span>{projCat.ufMax}</span>
                   </div>
-                  <div style={{ color:'#fff' }}>{fmtUF((sel.ufRef || getOptionCostoTotal(sel.itemIds || [])) * m2)} UF</div>
+                  <div className="text-[8px] text-center text-zinc-600 mt-2 uppercase">Referencia Construcción Chile</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* COLUMNA 3: TICKET FIJO DE INVERSIÓN (CARRITO) */}
+          <div className="sticky top-6 bg-zinc-950 border-t-2 border-t-yellow-600 border-x border-b border-zinc-800 rounded-md shadow-2xl flex flex-col">
+            <div className="p-5 border-b border-zinc-800 bg-zinc-900/20">
+              <div className="flex items-center gap-2 mb-1">
+                <Zap size={16} className="text-yellow-500"/>
+                <span className="font-bold text-sm text-white uppercase tracking-wider">
+                  CARRITO DE OBRA
+                </span>
+              </div>
+              <div className="font-mono text-[9px] text-zinc-400 tracking-widest">
+                {metrics.m2.toFixed(1)} m² SUPERFICIE · {allTicket.length} PARTIDAS
+              </div>
+            </div>
+
+            <div className="max-h-[400px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-yellow-900/50 scrollbar-track-transparent">
+              {allTicket.length === 0 && (
+                <div className="font-mono text-[9px] text-zinc-600 text-center py-10 tracking-widest uppercase">
+                  — Desglose vacío —
+                </div>
+              )}
+              {allTicket.map((it, i) => (
+                <div key={i} className="flex justify-between items-start gap-3 p-3 border-b border-zinc-900 last:border-0 hover:bg-zinc-900/50 transition-colors">
+                  <div className="text-zinc-400 max-w-[65%]">
+                    <div className="text-[8px] text-yellow-500 tracking-widest mb-1 uppercase font-mono truncate">
+                      {it.grupo}
+                    </div>
+                    <div className="text-[10px] leading-tight font-medium text-zinc-300 line-clamp-2">{it.nombre}</div>
+                  </div>
+                  <div className="font-mono text-[10px] font-bold text-white whitespace-nowrap bg-zinc-900 px-2 py-1 rounded border border-zinc-800">
+                    {fmtUF(it.cost)} UF
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div style={{ borderTop:'2px solid var(--gold)', marginTop:24, paddingTop:20 }}>
-              <div className="arch-font-mono" style={{ fontSize:32, fontWeight:800, color:'var(--gold)', lineHeight:1 }}>{fmtUF(totalUF)} <span style={{fontSize:16}}>UF</span></div>
-              <div className="arch-font-mono" style={{ fontSize:13, color:'#555', marginTop:8 }}>$ {fmt(totalUF * UF_VALOR)} CLP</div>
+            <div className="p-5 border-t border-zinc-800 bg-zinc-900/80 rounded-b-md">
+              <div className="font-mono text-[9px] text-zinc-400 tracking-widest mb-1">TOTAL PROVISORIO (SIN IVA)</div>
+              <div className="font-black text-4xl text-white leading-none tracking-tight flex items-baseline gap-1">
+                {fmtUF(totalUF)} <span className="text-lg text-yellow-500">UF</span>
+              </div>
+              <div className="font-mono text-xs text-zinc-500 mt-2 bg-zinc-950 inline-block px-2 py-1 rounded border border-zinc-800">
+                $ {fmt(totalUF * UF_VALOR)} CLP
+              </div>
             </div>
-
-            <button onClick={() => goStep(3)} disabled={!Object.keys(projSel).length}
-                    style={{ width:'100%', padding:'16px', marginTop: 24, background: 'var(--gold)', color: '#000', border:'none', fontWeight:900, fontSize:14, cursor:'pointer', textTransform:'uppercase' }}>
-              Finalizar Cotización
-            </button>
           </div>
+
         </div>
       </div>
     );
   }
+
   return null;
 };
 

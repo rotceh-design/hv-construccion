@@ -664,7 +664,7 @@ const CotizadorPage = () => {
         {[<Shield size={13}/>, <Star size={13}/>, <Clock size={13}/>].map((ic,i) => (
           <div key={i} style={{ display:'flex', alignItems:'center', gap:7, fontSize:12, color:'var(--text3)', fontWeight:500 }}>
             <span style={{ color:'var(--gold)' }}>{ic}</span>
-            {['Precio máximo garantizado','Materiales de primera marca','Visita técnica baja el costo'][i]}
+            {['Precio REALES garantizado','Materiales de primera marca','Visita técnica baja el costo'][i]}
           </div>
         ))}
       </div>
