@@ -533,44 +533,132 @@ const CotizadorPage = () => {
         </p>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:16 }}>
-        {[
-          { id:'proyecto', label:'Proyecto Completo', sub:'Obras mayores · HV lidera', grad:'linear-gradient(145deg,#0f2444,#1a4db5)',
-            desc:'Segundo piso, ampliaciones, techo, radier. Presupuesto con selección de materiales y precio por m².',
-            tags:['Segundo Piso','Ampliación','Techo / Cobertizo','Radier'], badge:null },
-          { id:'servicio', label:'Servicio Especializado', sub:'Colaboradores certificados HV', grad:'linear-gradient(145deg,#0c2a1e,#0f6e40)',
-            desc:'Gasfitería, electricidad, climatización, terminaciones. Selección granular ítem por ítem.',
-            tags:['Gasfitería','Electricidad','Clima','Pisos'], badge:null },
-          { id:'urgencia', label:'Urgencia 24/7', sub:'Respuesta < 2 horas', grad:'linear-gradient(145deg,#3a0000,#c0392b)',
-            desc:'Fuga de agua, corte eléctrico, destape, calefont apagado. Llegamos ya. Precio fijo.',
-            tags:['Fuga de agua','Corte luz','Destape','Gas'], badge:'24/7' },
-        ].map((cat,i) => (
-          <button key={cat.id} className={`macro-card fade-up`}
-            style={{ animationDelay:`${i*.1}s` }}
-            onClick={() => {
-              setMacro(cat.id);
-              if (cat.id === 'proyecto') goStep(2);
-              else { setActiveCat(cat.id === 'urgencia' ? 'urgencias' : null); goStep(2); }
+<div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:16 }}>
+  {[
+    { 
+      id:'proyecto', 
+      label:'Proyecto Completo', 
+      sub:'Obras mayores · HV lidera', 
+      // Amarillo Industrial a Negro
+      grad:'linear-gradient(145deg, #FFCF40, #000000)',
+      border: '#FFCF40',
+      desc:'Segundo piso, ampliaciones, techo, radier. Presupuesto con selección de materiales y precio por m².',
+      tags:['Segundo Piso','Ampliación','Techo / Cobertizo','Radier'], 
+      badge:null 
+    },
+    { 
+      id:'servicio', 
+      label:'Servicio Especializado', 
+      sub:'Colaboradores certificados HV', 
+      // Azul Eléctrico
+      grad:'linear-gradient(145deg, #2E5BFF, #001A33)',
+      border: '#2E5BFF',
+      desc:'Gasfitería, electricidad, climatización, terminaciones. Selección granular ítem por ítem.',
+      tags:['Gasfitería','Electricidad','Clima','Pisos'], 
+      badge:null 
+    },
+    { 
+      id:'urgencia', 
+      label:'Urgencia 24/7', 
+      sub:'Respuesta < 2 horas', 
+      // Rojo Fuerte
+      grad:'linear-gradient(145deg, #FF0000, #400000)',
+      border: '#FF0000',
+      desc:'Fuga de agua, corte eléctrico, destape, calefont apagado. Llegamos ya. Precio fijo.',
+      tags:['Fuga de agua','Corte luz','Destape','Gas'], 
+      badge:'24/7' 
+    },
+  ].map((cat, i) => (
+    <button 
+      key={cat.id} 
+      className={`macro-card fade-up`}
+      style={{ 
+        animationDelay: `${i * .1}s`,
+        position: 'relative',
+        overflow: 'hidden',
+        border: `1px solid ${cat.border}44`, // Borde sutil del color de la categoría
+        textAlign: 'left',
+        background: '#0a0a0a' // Fondo base oscuro para que el gradiente brille
+      }}
+      onClick={() => {
+        setMacro(cat.id);
+        if (cat.id === 'proyecto') goStep(2);
+        else { 
+          setActiveCat(cat.id === 'urgencia' ? 'urgencias' : null); 
+          goStep(2); 
+        }
+      }}
+    >
+      {/* Gradiente de fondo con más presencia (opacity .25 para colores vivos) */}
+      <div style={{ position:'absolute', inset:0, background:cat.grad, opacity:.25 }}/>
+      
+      <div style={{ position:'relative', zIndex:1 }}>
+        {cat.badge && (
+          <div style={{ 
+            position:'absolute', top:0, right:0, 
+            background:'#FF0000', color:'#fff', 
+            fontSize:9, fontWeight:800, 
+            padding:'3px 10px', borderRadius:20, 
+            letterSpacing:'.08em', textTransform:'uppercase', 
+            display:'flex', alignItems:'center', gap:4,
+            boxShadow: '0 0 10px rgba(255,0,0,0.5)'
+          }}>
+            <div style={{ width:5, height:5, borderRadius:'50%', background:'#fff', animation:'pulse2 1.5s infinite' }}/>
+            {cat.badge}
+          </div>
+        )}
+        
+        <div style={{ fontSize:11, color: cat.border, fontWeight:700, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:8 }}>
+          {cat.sub}
+        </div>
+        
+        <h3 style={{ 
+          fontFamily:'var(--ff-display)', 
+          fontWeight:900, 
+          fontSize:32, 
+          textTransform:'uppercase', 
+          color:'#fff', 
+          lineHeight:1, 
+          marginBottom:10,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        }}>
+          {cat.label}
+        </h3>
+        
+        <p style={{ fontSize:13, color:'var(--text2)', lineHeight:1.6, marginBottom:18 }}>
+          {cat.desc}
+        </p>
+        
+        <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+          {cat.tags.map(t => (
+            <span key={t} style={{ 
+              fontSize:10, 
+              padding:'3px 10px', 
+              background:'rgba(255,255,255,.08)', 
+              borderRadius:20, 
+              color:'#fff', 
+              fontWeight:600,
+              border: `1px solid ${cat.border}33`
             }}>
-            <div style={{ position:'absolute', inset:0, background:cat.grad, opacity:.12 }}/>
-            <div style={{ position:'relative', zIndex:1 }}>
-              {cat.badge && (
-                <div style={{ position:'absolute', top:0, right:0, background:'var(--red)', color:'#fff', fontSize:9, fontWeight:800, padding:'3px 10px', borderRadius:20, letterSpacing:'.08em', textTransform:'uppercase', display:'flex', alignItems:'center', gap:4 }}>
-                  <div style={{ width:5, height:5, borderRadius:'50%', background:'#fff', animation:'pulse2 1.5s infinite' }}/>
-                  {cat.badge}
-                </div>
-              )}
-              <div style={{ fontSize:11, color:'var(--text3)', fontWeight:700, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:8 }}>{cat.sub}</div>
-              <h3 style={{ fontFamily:'var(--ff-display)', fontWeight:900, fontSize:32, textTransform:'uppercase', color:'#fff', lineHeight:1, marginBottom:10 }}>{cat.label}</h3>
-              <p style={{ fontSize:13, color:'var(--text2)', lineHeight:1.6, marginBottom:18 }}>{cat.desc}</p>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-                {cat.tags.map(t => <span key={t} style={{ fontSize:10, padding:'3px 10px', background:'rgba(255,255,255,.06)', borderRadius:20, color:'var(--text3)', fontWeight:600 }}>{t}</span>)}
-              </div>
-            </div>
-            <ArrowRight size={16} style={{ position:'absolute', bottom:26, right:26, color:'rgba(255,255,255,.18)' }}/>
-          </button>
-        ))}
+              {t}
+            </span>
+          ))}
+        </div>
       </div>
+      
+      <ArrowRight 
+        size={16} 
+        style={{ 
+          position:'absolute', 
+          bottom:26, 
+          right:26, 
+          color: cat.border,
+          opacity: 0.6
+        }} 
+      />
+    </button>
+  ))}
+</div>
 
       <div style={{ display:'flex', gap:28, justifyContent:'center', marginTop:48, flexWrap:'wrap' }}>
         {[<Shield size={13}/>, <Star size={13}/>, <Clock size={13}/>].map((ic,i) => (
