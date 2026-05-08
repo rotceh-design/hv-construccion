@@ -6,6 +6,17 @@ import {
 } from 'lucide-react';
 import { PROYECTOS_DATA, UF_VALOR } from '../../data/serviciosData';
 import { fmt, fmtUF, BackBtn } from './Cotizadorpage';
+import SiteDataBlock from './SiteDataBlock'; // <--- IMPORTACIÓN DEL NUEVO BLOQUE I.A.
+
+// ─── MAPEO DE IMÁGENES DE FIREBASE STORAGE ──────────────────────────────────
+const PROJECT_IMAGES = {
+  segundos_pisos: "https://firebasestorage.googleapis.com/v0/b/hv-construccion.firebasestorage.app/o/segundos_pisos.png?alt=media&token=d646a127-6d68-49e6-9420-0b6cd2d3dea8",
+  ampliaciones: "https://firebasestorage.googleapis.com/v0/b/hv-construccion.firebasestorage.app/o/ampliaciones.png?alt=media&token=33da03ec-bb74-4aaa-9a66-6d966dd22057",
+  techos: "https://firebasestorage.googleapis.com/v0/b/hv-construccion.firebasestorage.app/o/techos.png?alt=media&token=84466f57-a41f-4f06-9148-0c355fe3ea40",
+  quinchos: "https://firebasestorage.googleapis.com/v0/b/hv-construccion.firebasestorage.app/o/quincho.png?alt=media&token=9205561b-6da1-4ca3-b390-82c8191d0ec9",
+  radiers: "https://firebasestorage.googleapis.com/v0/b/hv-construccion.firebasestorage.app/o/radier.png?alt=media&token=16e227c2-510e-4be1-8aae-8ca2cc9de14b",
+  muros_perimetrales: "https://firebasestorage.googleapis.com/v0/b/hv-construccion.firebasestorage.app/o/muros.png?alt=media&token=ab74d4b5-5a23-46ee-a3d8-2f66cc8f0119"
+};
 
 // ─── CONFIGURACIÓN DINÁMICA DE DIMENSIONES ────────────────────────────────
 const CATEGORY_CONFIG = {
@@ -25,16 +36,9 @@ const CATEGORY_CONFIG = {
     ],
     calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: (d.largo * d.ancho * 0.10), ud: 1 })
   },
-  cobertizos: {
+  techos: { // Merge cobertizos input/calc here (they were identical)
     inputs: [
-      { key: 'largo', label: 'LARGO COBERTIZO', step: 0.5, unit: 'm', def: 5 },
-      { key: 'ancho', label: 'ANCHO COBERTIZO', step: 0.5, unit: 'm', def: 3 }
-    ],
-    calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: 0, ud: 1 })
-  },
-  techos: {
-    inputs: [
-      { key: 'largo', label: 'LARGO TECHO', step: 0.5, unit: 'm', def: 6 },
+      { key: 'largo', label: 'LARGO TECHO/COBERTIZO', step: 0.5, unit: 'm', def: 6 },
       { key: 'ancho', label: 'ANCHO (SALIENTE)', step: 0.5, unit: 'm', def: 4 }
     ],
     calc: (d) => ({ m2: d.largo * d.ancho, ml: (d.largo + d.ancho) * 2, m3: 0, ud: 1 })
@@ -78,6 +82,10 @@ const SectionProyectos = ({ step, goStep, projCatId, setProjCatId, projSel, setP
 
   const [stageIdx, setStageIdx] = useState(0);
   const [dims, setDims] = useState({});
+  
+  // Estados para la FASE 00 (IA y Terreno)
+  const [aiStatus, setAiStatus] = useState('idle'); // 'idle' | 'analyzing' | 'done'
+  const [siteData, setSiteData] = useState({ soil: 'normal', access: 'camion', debris: 'limpio' });
 
   // Inicializar dimensiones
   useEffect(() => {
@@ -86,27 +94,51 @@ const SectionProyectos = ({ step, goStep, projCatId, setProjCatId, projSel, setP
       const initialDims = {};
       config.inputs.forEach(inp => initialDims[inp.key] = inp.def);
       setDims(initialDims);
+      setAiStatus('idle'); // Reset IA
     }
   }, [projCatId]);
 
   const catConfig = CATEGORY_CONFIG[projCatId] || CATEGORY_CONFIG.default;
   const metrics = catConfig.calc(dims); // Retorna { m2, ml, m3, ud }
 
-  // ─── GENERADOR DINÁMICO DE FASES DESDE LA BASE DE DATOS MAESTRA ────────────
-  // Transformamos los grupos reales de PROYECTOS_DATA en pestañas visuales.
-  // Esto garantiza que el 100% de la biblioteca esté disponible y detallada.
+  // Simulador de procesamiento IA
+  const handleAITrigger = () => {
+    if (aiStatus !== 'idle') return;
+    setAiStatus('analyzing');
+    setTimeout(() => {
+      setAiStatus('done');
+    }, 2500); // Finge pensar por 2.5s
+  };
+
+  // ─── GENERADOR DINÁMICO DE FASES: AHORA INCLUYE LA FASE 00 DE ANÁLISIS ──────
   const stages = useMemo(() => {
     if (!projCat || !projCat.grupos) return [];
-    return projCat.grupos.map((grupo, idx) => ({
-      id: `stage_${idx}`,
-      phase: `FASE ${String(idx + 1).padStart(2, '0')}`,
+    
+    // Convertimos los grupos reales de la BD a Fases
+    const dbStages = projCat.grupos.map((grupo, idx) => ({
+      id: `stage_${idx + 1}`,
+      // Reemplazado FASE por ETAPA DE PARTIDAS
+      phase: `ETAPA DE PARTIDAS ${String(idx + 1).padStart(2, '0')}`,
       title: grupo.nombre,
       desc: grupo.desc || 'Selecciona todas las partidas técnicas requeridas para esta etapa.',
-      options: grupo.items
+      options: grupo.items,
+      type: 'db'
     }));
+
+    // Inyectamos la FASE 00 como el primer paso obligatorio
+    const phase0 = {
+      id: 'stage_0',
+      // Reemplazado FASE 00 por etiqueta descriptiva
+      phase: 'ANÁLISIS INICIAL Y MEDIDAS',
+      title: 'ANÁLISIS DE SITIO E IA',
+      desc: 'Ingresa medidas, condiciones del terreno y análisis fotográfico.',
+      type: 'ai_setup'
+    };
+
+    return [phase0, ...dbStages];
   }, [projCat]);
 
-  // Total en UF sumando todo lo seleccionado según la métrica correspondiente
+  // Total en UF
   const totalUF = useMemo(() => {
     let t = 0;
     Object.values(projSel).forEach(it => {
@@ -130,42 +162,50 @@ const SectionProyectos = ({ step, goStep, projCatId, setProjCatId, projSel, setP
   // ── PANTALLA 2: SELECCIÓN DE CATEGORÍA ─────────────────────────────────────
   if (step === 2) {
     return (
-      <div className="animate-fade-in text-zinc-100 font-sans">
+      <div className="animate-fade-in text-black font-sans bg-transparent">
         <BackBtn onClick={() => goStep(1)}/>
 
-        <div className="mb-14">
-          <div className="text-[10px] text-yellow-500 tracking-widest mb-3 uppercase font-mono font-bold">
+        {/* Espaciado mb aumentado mb-14 -> mb-20 */}
+        <div className="mb-20">
+          <div className="text-[11px] text-black font-black bg-[#FFCF40] border-2 border-white px-2 py-1 inline-block shadow-[2px_2px_0px_rgba(0,0,0,1)] tracking-widest mb-4 uppercase font-mono">
             /// INGENIERÍA Y PROYECTOS
           </div>
           <h1 className="font-black text-5xl md:text-7xl uppercase leading-none mb-5 tracking-tight text-white">
-            ELIGE TU<br/><span className="text-yellow-600">OBRA</span>
+            ELIGE TU<br/><span className="text-[#131211] bg-[#FFCF40] px-2 py-1 inline-block mt-2 shadow-[6px_6px_0px_rgba(0,0,0,1)]">OBRA</span>
           </h1>
-          <p className="text-zinc-400 text-sm max-w-xl leading-relaxed">
+          <p className="text-white font-bold text-sm max-w-xl leading-relaxed mt-6">
             Catálogo maestro de partidas. Selecciona la categoría para dimensionar y acceder al desglose técnico detallado de nuestra base de datos.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {Object.entries(PROYECTOS_DATA).filter(([k]) => k !== 'instalaciones_generales').map(([key, cat], i) => (
+        {/* Espaciado gap aumentado gap-6 -> gap-10 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {Object.entries(PROYECTOS_DATA).filter(([k]) => k !== 'instalaciones_generales' && k !== 'cobertizos').map(([key, cat], i) => (
             <button key={key} 
-                    className="group bg-zinc-950 border border-zinc-800 hover:border-yellow-600 transition-all cursor-pointer relative overflow-hidden flex flex-col text-left rounded-lg shadow-md"
+                    className="group bg-white border-2 border-black transition-all cursor-pointer relative overflow-hidden flex flex-col text-left rounded-none shadow-[6px_6px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[10px_10px_0px_rgba(0,0,0,1)]"
                     onClick={() => handlePickCat(key)}>
-              <div className="h-40 bg-zinc-900 w-full relative overflow-hidden flex items-center justify-center">
-                <span className="text-6xl opacity-20 group-hover:opacity-40 transition-opacity group-hover:scale-110 duration-500">{cat.emoji}</span>
+              {/* Contenedor de imagen: Reemplazado emoji por img tag con URL de Firebase */}
+              <div className="h-48 bg-[#111] w-full relative overflow-hidden flex items-center justify-center border-b-2 border-black">
+                {PROJECT_IMAGES[key] ? (
+                  <img src={PROJECT_IMAGES[key]} alt={cat.label} className="w-full h-full object-cover group-hover:scale-110 duration-500 transition-transform"/>
+                ) : (
+                  <span className="text-6xl opacity-100 group-hover:scale-125 duration-500">{cat.emoji}</span>
+                )}
               </div>
-              <div className="p-6 flex flex-col flex-1">
-                <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-1 border mb-3 w-fit border-yellow-500/40 text-yellow-500 bg-yellow-900/10">
-                  CONFIGURADOR TÉCNICO DETALLADO
+              {/* Padding interno aumentado p-6 -> p-8 */}
+              <div className="p-8 flex flex-col flex-1">
+                <span className="font-mono font-black text-[9px] tracking-widest uppercase px-2 py-1 border-2 mb-4 w-fit border-black text-black bg-[#FFCF40] shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  LEVANTAMIENTO + BD DETALLADA
                 </span>
-                <h3 className="font-bold text-2xl uppercase text-white leading-tight mb-2">
+                <h3 className="font-black text-2xl uppercase text-black leading-tight mb-3">
                   {cat.label}
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed mb-4 flex-1">
+                <p className="text-xs font-bold text-gray-600 leading-relaxed mb-8 flex-1">
                   {cat.desc}
                 </p>
-                <div className="flex justify-between items-center border-t border-zinc-800 pt-4 mt-auto">
-                  <div className="font-bold text-sm text-white flex items-center gap-2 tracking-wide">
-                    INICIAR PROYECTO <ArrowRight size={14} className="text-yellow-500 group-hover:translate-x-1 transition-transform"/>
+                <div className="flex justify-between items-center border-t-2 border-black pt-4 mt-auto">
+                  <div className="font-black text-sm text-black flex items-center gap-2 tracking-wide">
+                    INICIAR PROYECTO <ArrowRight size={16} className="text-black group-hover:translate-x-2 transition-transform stroke-[3px]"/>
                   </div>
                 </div>
               </div>
@@ -188,239 +228,345 @@ const SectionProyectos = ({ step, goStep, projCatId, setProjCatId, projSel, setP
     });
 
     return (
-      <div className="max-w-[1600px] mx-auto animate-fade-in font-sans text-zinc-100">
+      <div className="max-w-[1600px] mx-auto animate-fade-in font-sans text-black mt-10">
         <BackBtn onClick={() => { goStep(2); setProjCatId(null); setProjSel({}); }}/>
 
-        {/* HEADER Y DIMENSIONES DINÁMICAS */}
-        <div className="flex flex-wrap gap-8 items-end mb-10">
+        {/* HEADER LIMPIO Y ESTÉTICO - Espaciado mb aumentado */}
+        <div className="flex flex-wrap gap-8 items-end mb-14 border-b-4 border-black pb-8">
           <div className="flex-1 min-w-[280px]">
-            <div className="font-mono text-[10px] text-yellow-500 tracking-widest mb-2">
+            <div className="font-mono text-[10px] text-[#FFCF40] bg-[#111] border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] px-2 py-1 w-fit font-black tracking-widest mb-4 flex items-center gap-2">
               {projCat.emoji} CALCULADORA ARQUITECTÓNICA // {projCat.label.toUpperCase()}
             </div>
             <h1 className="font-black text-4xl md:text-6xl uppercase text-white leading-none tracking-tight">
-              AJUSTA LAS<br/><span className="text-yellow-600">MEDIDAS</span>
+              CONFIGURADOR DE<br/><span className="text-[#000000] bg-[#fcfcfc] px-3 inline-block shadow-[6px_6px_0px_rgba(0,0,0,1)] mt-2">PARTIDAS</span>
             </h1>
           </div>
 
-          <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-lg flex flex-wrap gap-6 items-center shadow-xl">
-            {catConfig.inputs.map(({ key, label, step, unit }) => (
-              <div key={key} className="flex flex-col">
-                <label className="font-mono text-[9px] text-zinc-500 mb-1 tracking-widest">{label} ({unit})</label>
-                <input type="number" min={0.1} step={step} 
-                       className="bg-transparent border-b border-zinc-700 text-yellow-500 font-mono text-xl font-bold w-24 text-center outline-none focus:border-yellow-500 transition-colors pb-1"
-                       value={dims[key] || ''}
-                       onChange={e => setDims(d => ({ ...d, [key]: Math.max(0.1, Number(e.target.value)) }))}/>
+          <div className="flex gap-8 items-center bg-white px-6 py-4 rounded-none border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)]">
+            <div>
+              <div className="font-mono font-black text-[10px] text-gray-500 mb-1 tracking-widest uppercase">Área Total Calculada</div>
+              <div className="font-mono text-3xl font-black text-black flex items-baseline gap-1">
+                {metrics.m2?.toFixed(1)} <span className="text-sm text-black bg-[#FFCF40] px-1 border-2 border-black font-bold">m²</span>
               </div>
-            ))}
-            
-            <div className="w-[1px] h-10 bg-zinc-800 hidden md:block"></div>
-            
-            <div className="flex gap-6 flex-wrap">
-              <div>
-                <div className="font-mono text-[9px] text-zinc-400 mb-1 tracking-widest">ÁREA (m²)</div>
-                <div className="font-mono text-2xl font-bold text-white">{metrics.m2?.toFixed(1)}</div>
-              </div>
-              {metrics.ml > 0 && (
-                <div>
-                  <div className="font-mono text-[9px] text-zinc-400 mb-1 tracking-widest">PERÍMETRO (ml)</div>
-                  <div className="font-mono text-2xl font-bold text-white">{metrics.ml?.toFixed(1)}</div>
-                </div>
-              )}
-              {metrics.m3 > 0 && (
-                <div>
-                  <div className="font-mono text-[9px] text-zinc-400 mb-1 tracking-widest">VOLUMEN (m³)</div>
-                  <div className="font-mono text-2xl font-bold text-white">{metrics.m3?.toFixed(1)}</div>
-                </div>
-              )}
             </div>
+            {metrics.ml > 0 && (
+              <>
+                <div className="w-[2px] h-12 bg-black hidden md:block"></div>
+                <div>
+                  <div className="font-mono font-black text-[10px] text-gray-500 mb-1 tracking-widest uppercase">Perímetro</div>
+                  <div className="font-mono text-xl font-black text-black flex items-baseline gap-1">
+                    {metrics.ml?.toFixed(1)} <span className="text-xs text-black bg-[#f0f0f0] px-1 border-2 border-black font-bold">ml</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* NAVEGADOR DINÁMICO DE FASES (Lee la base de datos) */}
-        <div className="flex gap-0 mb-10 border border-zinc-800 overflow-x-auto scrollbar-hide rounded-md bg-zinc-950/50">
+        {/* NAVEGADOR DINÁMICO DE FASES - Espaciado mb aumentado */}
+        <div className="flex gap-0 mb-14 border-2 border-black overflow-x-auto scrollbar-hide bg-white shadow-[6px_6px_0px_rgba(0,0,0,1)]">
           {stages.map((st, idx) => {
             const active = idx === stageIdx;
-            // Se marca con check si hay al menos un ítem seleccionado en esta fase
-            const hasSelection = st.options.some(opt => projSel[opt.id]);
+            const hasSelection = st.type === 'ai_setup' ? true : st.options.some(opt => projSel[opt.id]);
+            
             return (
               <div key={st.id}
-                   className={`flex-none min-w-[150px] border-r border-zinc-800 p-4 cursor-pointer transition-all relative
-                              ${active ? 'bg-yellow-950/20 border-t-2 border-t-yellow-600 -mt-[1px] opacity-100' : 'opacity-40 hover:opacity-70'}
-                              ${hasSelection && !active ? 'bg-emerald-900/10 opacity-100' : ''}`}
+                   className={`flex-none min-w-[180px] border-r-2 border-black p-5 cursor-pointer transition-all relative
+                              ${active ? 'bg-[#111] text-white border-b-4 border-[#FFCF40] opacity-100' : 'bg-white text-black hover:bg-gray-100 opacity-100'}
+                              ${hasSelection && !active ? 'bg-[#FFCF40]' : ''}`}
                    onClick={() => setStageIdx(idx)}>
-                <div className={`font-mono text-[9px] mb-1 tracking-widest ${active ? 'text-yellow-500' : 'text-zinc-500'}`}>
-                  {st.phase}
+                <div className={`font-mono font-black text-[10px] mb-1.5 tracking-widest flex items-center gap-1 ${active ? 'text-[#FFCF40]' : 'text-black'}`}>
+                  {st.type === 'ai_setup' && <Eye size={12} strokeWidth={3} />} {st.phase}
                 </div>
-                <div className={`font-bold text-xs uppercase ${active ? 'text-white' : 'text-zinc-400'}`}>
+                <div className={`font-black text-[13px] leading-tight uppercase ${active ? 'text-white' : 'text-black'}`}>
                   {st.title}
                 </div>
-                {hasSelection && <Check size={14} className="absolute top-3 right-3 text-emerald-500" />}
+                {hasSelection && st.type !== 'ai_setup' && <Check size={20} strokeWidth={4} className={`absolute top-5 right-5 ${active ? 'text-[#FFCF40]' : 'text-black'}`} />}
               </div>
             );
           })}
         </div>
 
-        {/* LAYOUT A 3 COLUMNAS */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px_340px] gap-8 items-start">
+        {/* LAYOUT A 3 COLUMNAS - Gap aumentado gap-8 -> gap-12 */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px_340px] gap-12 items-start mb-16">
 
-          {/* COLUMNA 1: DESGLOSE DE PARTIDAS (SELECCIÓN MÚLTIPLE) */}
+          {/* COLUMNA 1: CONTENIDO DINÁMICO (FASE 00 o LISTA DE PARTIDAS) */}
           <div className="min-w-0">
             {stages[stageIdx] && (
               <div className="animate-fade-in">
-                <div className="flex gap-4 items-start mb-6">
-                  <div className="font-black text-6xl text-zinc-800/40 leading-none -mt-2 select-none">
-                    {String(stageIdx + 1).padStart(2,'0')}
+                <div className="flex gap-5 items-start mb-10 bg-white border-2 border-black p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                  <div className="font-black text-6xl text-black leading-none select-none drop-shadow-[2px_2px_0px_rgba(255,207,64,1)]">
+                    {String(stageIdx).padStart(2,'0')}
                   </div>
-                  <div>
-                    <h2 className="font-black text-2xl uppercase text-white tracking-wide m-0">{stages[stageIdx].title}</h2>
-                    <p className="text-xs text-zinc-400 mt-1">{stages[stageIdx].desc}</p>
+                  <div className="mt-1">
+                    {/* Reemplazado visualmente FASE 00/01... por ETAPA DE PARTIDAS */}
+                    <h2 className="font-black text-2xl uppercase text-black tracking-wide m-0">
+                        {stageIdx === 0 ? "ANÁLISIS INICIAL Y MEDIDAS" : `ETAPA DE PARTIDAS ${String(stageIdx).padStart(2,'0')}`} // {stages[stageIdx].title}
+                    </h2>
+                    <p className="text-xs font-bold text-gray-700 mt-1.5">{stages[stageIdx].desc}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {stages[stageIdx].options.map((opt) => {
-                    const sel = !!projSel[opt.id];
+                {/* ─── RENDER EXCLUSIVO PARA LA FASE 00 ────────────────────────── */}
+                {stages[stageIdx].type === 'ai_setup' && (
+                  <div className="flex flex-col gap-10"> {/* Gap aumentado */}
                     
-                    return (
-                      <div key={opt.id} 
-                           className={`group flex flex-col bg-zinc-950 border transition-all cursor-pointer rounded-md relative shadow-sm
-                                      ${sel ? 'border-yellow-500 bg-yellow-950/10 ring-1 ring-yellow-500' : 'border-zinc-800 hover:border-zinc-500'}`}
-                           onClick={() => setProjSel(p => { 
-                             const n = {...p}; 
-                             if (n[opt.id]) delete n[opt.id]; 
-                             else n[opt.id] = { ...opt, grupo: stages[stageIdx].title }; 
-                             return n; 
-                           })}>
-                        
-                        <div className="p-4 flex-1 flex flex-col">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className={`font-bold text-xs uppercase pr-6 leading-tight ${sel ? 'text-yellow-500' : 'text-white'}`}>
-                              {opt.nombre}
-                            </h3>
-                            {sel ? (
-                              <Check size={16} className="text-yellow-500 absolute top-4 right-4 flex-shrink-0"/>
-                            ) : (
-                              <div className="w-4 h-4 rounded border border-zinc-700 absolute top-4 right-4 flex-shrink-0"></div>
-                            )}
+                    {/* BLOQUE 1: DIMENSIONES */}
+                    <div className="bg-white p-6 border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+                      <h3 className="font-black text-sm text-black bg-[#FFCF40] border-2 border-black px-2 py-1 w-fit uppercase mb-6 flex items-center gap-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                        <Triangle size={16} strokeWidth={3}/> Geometría del Proyecto
+                      </h3>
+                      <div className="flex flex-wrap gap-5 relative z-10"> {/* Gap aumentado */}
+                        {catConfig.inputs.map(({ key, label, step, unit }) => (
+                          <div key={key} className="flex flex-col bg-[#f8f9fa] p-5 border-2 border-black w-44 hover:border-black focus-within:bg-[#FFCF40] focus-within:shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all">
+                            <label className="font-black text-[10px] text-black mb-2.5 tracking-widest">{label} ({unit})</label>
+                            <input type="number" min={0.1} step={step} 
+                                   className="bg-transparent text-black font-mono text-3xl font-black outline-none border-b-2 border-black pb-1.5 w-full"
+                                   value={dims[key] || ''}
+                                   onChange={e => setDims(d => ({ ...d, [key]: Math.max(0.1, Number(e.target.value)) }))}/>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* BLOQUE 2: MOTOR IA FOTOGRÁFICO */}
+                    <div className="bg-white p-6 border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] relative">
+                      <div className="flex justify-between items-center mb-6 border-b-2 border-black pb-4 gap-4 flex-wrap">
+                        <h3 className="font-black text-sm text-black bg-[#FFCF40] border-2 border-black px-2 py-1 uppercase flex items-center gap-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                          <Eye size={18} strokeWidth={3}/> Motor de Análisis Visual
+                        </h3>
+                        <div className="flex items-center gap-2 font-black text-[10px] bg-[#111] border-2 border-black text-[#FFCF40] px-3 py-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                          <span className="relative flex h-2 w-2">
+                            {aiStatus === 'analyzing' && <span className="animate-ping absolute inline-flex h-full w-full bg-[#FFCF40] opacity-75"></span>}
+                            <span className="relative inline-flex h-2 w-2 bg-[#FFCF40]"></span>
+                          </span>
+                          GEMINI AI ASSISTANT
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8"> {/* Gap aumentado */}
+                        {/* Zona Drop de Imagen */}
+                        <div className={`border-4 border-dashed border-black p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-[260px]
+                                        ${aiStatus === 'idle' ? 'bg-[#f0f0f0] hover:bg-[#FFCF40] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]' : 
+                                          aiStatus === 'analyzing' ? 'bg-[#111] text-white border-solid' : 'bg-white border-solid shadow-[6px_6px_0px_rgba(0,0,0,1)]'}`}
+                             onClick={handleAITrigger}>
                           
-                          {opt.desc && <p className="text-[10px] text-zinc-400 leading-relaxed mb-4">{opt.desc}</p>}
+                          {aiStatus === 'idle' && (
+                            <div className="animate-fade-in flex flex-col items-center">
+                              <div className="w-16 h-16 bg-white border-4 border-black flex items-center justify-center mb-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                                <Eye size={30} className="text-black" strokeWidth={3} />
+                              </div>
+                              <p className="text-md font-black text-black mb-1.5">Subir Fotografía del Sitio</p>
+                              <p className="text-[10px] font-bold text-black uppercase tracking-widest max-w-[200px] leading-relaxed mt-2 bg-white border-2 border-black px-2 py-1">
+                                Clic para evaluar interferencias
+                              </p>
+                            </div>
+                          )}
                           
-                          <div className="mt-auto pt-3 border-t border-zinc-800/60 flex justify-between items-center">
-                            <span className="font-mono text-[9px] bg-zinc-900 border border-zinc-800 px-2 py-1 rounded text-zinc-500 tracking-widest uppercase">
-                              {opt.unidad}
-                            </span>
-                            <span className={`font-mono text-[11px] font-bold ${sel ? 'text-yellow-500' : 'text-zinc-400'}`}>
-                              {opt.ufRef} UF / Base
-                            </span>
+                          {aiStatus === 'analyzing' && (
+                            <div className="animate-fade-in flex flex-col items-center">
+                              <div className="w-12 h-12 border-4 border-[#FFCF40] border-t-transparent rounded-none animate-spin mb-5"></div>
+                              <p className="text-sm text-[#FFCF40] font-black font-mono tracking-widest uppercase mb-1.5">Ejecutando Modelos...</p>
+                              <p className="text-[10px] text-white font-bold uppercase mt-2">Escaneando topografía y materialidad</p>
+                            </div>
+                          )}
+                          
+                          {aiStatus === 'done' && (
+                            <div className="animate-fade-in flex flex-col items-center">
+                              <div className="w-16 h-16 bg-[#FFCF40] border-4 border-black flex items-center justify-center mb-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                                <Check size={36} className="text-black" strokeWidth={4} />
+                              </div>
+                              <p className="text-lg font-black text-black mb-1.5">Mapeo Completado</p>
+                              <p className="text-[10px] font-bold text-black uppercase tracking-widest mt-1.5 bg-[#f0f0f0] border-2 border-black px-2 py-1">Resultados extraídos a la derecha</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Resultados Mock IA */}
+                        <div className="flex flex-col justify-center gap-5 relative"> {/* Gap aumentado */}
+                          {aiStatus !== 'done' && (
+                            <div className="absolute inset-0 bg-white/95 z-10 flex items-center justify-center border-4 border-dashed border-black">
+                              <span className="font-black text-[12px] text-black bg-[#FFCF40] border-2 border-black px-5 py-2.5 uppercase tracking-widest text-center shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                                Esperando fotografía<br/>para extraer telemetría
+                              </span>
+                            </div>
+                          )}
+                          <div className="p-5 border-2 border-black bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                            <span className="text-[10px] font-black text-black bg-[#FFCF40] px-2 py-1 uppercase border-2 border-black w-fit block mb-2.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">Detección de Topografía</span>
+                            <span className="text-sm font-bold text-black">Pendiente Leve (~5%) detectada en el plano base.</span>
+                          </div>
+                          <div className="p-5 border-2 border-black bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                            <span className="text-[10px] font-black text-black bg-[#FFCF40] px-2 py-1 uppercase border-2 border-black w-fit block mb-2.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">Accesibilidad Espacial</span>
+                            <span className="text-sm font-bold text-black">Apertura estrecha de 1.2m. Imposibilita ingreso de maquinaria pesada.</span>
+                          </div>
+                          <div className="p-5 border-2 border-black bg-[#111] shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                            <span className="text-[10px] font-black text-[#111] bg-[#ef4444] px-2 py-1 uppercase border-2 border-black w-fit block mb-2.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">Interferencias (Atención)</span>
+                            <span className="text-sm font-bold text-white">Presencia de radier antiguo y escombros menores que requieren retiro.</span>
+                          </div>
+                          <div className="text-right mt-2.5">
+                            <button className="text-[10px] font-black text-black bg-white border-2 border-black px-2.5 py-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-[#FFCF40] uppercase tracking-widest transition-colors"
+                                    onClick={() => setAiStatus('idle')}>
+                              [ Limpiar y reescanear ]
+                            </button>
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+
+                    {/* BLOQUE 3: CONDICIONES DE ENTORNO (MANUAL) */}
+                    <div className="mb-8"> {/* Espaciado extra */}
+                        <SiteDataBlock siteData={siteData} setSiteData={setSiteData} />
+                    </div>
+
+                  </div>
+                )}
+
+                {/* ─── RENDER NORMAL PARA LISTADO DE PARTIDAS (BD) ─────────────── */}
+                {stages[stageIdx].type === 'db' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 mb-10"> {/* Gaps y margen aumentados */}
+                    {stages[stageIdx].options.map((opt) => {
+                      const sel = !!projSel[opt.id];
+                      return (
+                        <div key={opt.id} 
+                             className={`group flex flex-col bg-white border-2 transition-all cursor-pointer relative 
+                                        ${sel ? 'border-black bg-[#FFCF40] shadow-[6px_6px_0px_rgba(0,0,0,1)] -translate-y-1' : 'border-black hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] shadow-[2px_2px_0px_rgba(0,0,0,1)]'}`}
+                             onClick={() => setProjSel(p => { 
+                               const n = {...p}; 
+                               if (n[opt.id]) delete n[opt.id]; 
+                               else n[opt.id] = { ...opt, grupo: stages[stageIdx].title }; 
+                               return n; 
+                             })}>
+                          
+                          <div className="p-6 flex-1 flex flex-col"> {/* Padding aumentado */}
+                            <div className="flex justify-between items-start mb-5">
+                              <h3 className={`font-black text-[14px] uppercase pr-8 leading-tight text-black`}>
+                                {opt.nombre}
+                              </h3>
+                              {sel ? (
+                                <Check size={24} strokeWidth={4} className="text-black absolute top-5 right-5 flex-shrink-0"/>
+                              ) : (
+                                <div className="w-5 h-5 border-2 border-black absolute top-5 right-5 flex-shrink-0 bg-white"></div>
+                              )}
+                            </div>
+                            
+                            {opt.desc && <p className="text-[12px] font-bold text-gray-700 leading-relaxed mb-7 line-clamp-3">{opt.desc}</p>}
+                            
+                            <div className="mt-auto pt-5 border-t-2 border-black flex justify-between items-center">
+                              <span className="font-black text-[11px] bg-black text-white border-2 border-black px-2.5 py-1 tracking-widest uppercase">
+                                {opt.unidad}
+                              </span>
+                              <span className={`font-mono text-[14px] font-black text-black bg-white px-2.5 py-1 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]`}>
+                                {opt.ufRef} UF / Base
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* BOTONERÍA DE NAVEGACIÓN */}
-            <div className="flex justify-between mt-8 pt-8 border-t border-zinc-800">
+            {/* BOTONERÍA DE NAVEGACIÓN - Margen superior aumentado */}
+            <div className="flex justify-between mt-16 pt-10 border-t-4 border-black">
               {stageIdx > 0 ? (
-                <button className="flex items-center gap-2 font-bold text-xs uppercase px-6 py-3 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 rounded transition-colors"
+                <button className="flex items-center gap-2.5 font-black text-sm uppercase px-7 py-4.5 border-2 border-black bg-white text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all"
                         onClick={() => setStageIdx(s => s-1)}>
-                  <ChevronLeft size={16}/> ANTERIOR
+                  <ChevronLeft size={20} strokeWidth={3}/> ANTERIOR
                 </button>
               ) : <div></div>}
               
               {stageIdx < stages.length - 1 ? (
-                <button className="flex items-center gap-2 font-bold text-xs uppercase px-8 py-3 bg-white text-black hover:bg-yellow-500 hover:text-black rounded transition-colors" 
+                <button className="flex items-center gap-2.5 font-black text-sm uppercase px-9 py-4.5 border-2 border-black bg-[#FFCF40] text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all" 
                         onClick={() => setStageIdx(s => s+1)}>
-                  SIGUIENTE FASE <ArrowRight size={16}/>
+                  SIGUIENTE ETAPA <ArrowRight size={20} strokeWidth={3}/>
                 </button>
               ) : (
-                <button className="flex items-center gap-2 font-bold text-xs uppercase px-8 py-3 bg-yellow-600 text-black hover:bg-yellow-500 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                <button className="flex items-center gap-2.5 font-black text-sm uppercase px-9 py-4.5 border-2 border-black bg-black text-[#FFCF40] shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={allTicket.length === 0}
                         onClick={() => goStep(3)}>
-                  RESUMEN FINAL <ArrowRight size={16}/>
+                  CERRAR PRESUPUESTO <ArrowRight size={20} strokeWidth={3}/>
                 </button>
               )}
             </div>
           </div>
 
-          {/* COLUMNA 2: INFO EXTRA Y CONTEXTO MATEMÁTICO */}
-          <div className="sticky top-6 hidden lg:block">
-            <div className="bg-zinc-950 border border-zinc-800 p-5 rounded-md shadow-lg">
-              <div className="flex items-center gap-2 mb-4 border-b border-zinc-800 pb-3">
-                <Info size={16} className="text-yellow-500"/>
-                <span className="font-mono text-[10px] text-yellow-500 tracking-widest font-bold">INFO MOTOR HV</span>
+          {/* COLUMNA 2: INFO EXTRA Y CONTEXTO MATEMÁTICO - Espaciado interno aumentado */}
+          <div className="sticky top-10 hidden lg:block mb-10">
+            <div className="bg-white border-2 border-black p-8 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+              <div className="flex items-center gap-2.5 mb-6 border-b-2 border-black pb-5">
+                <Info size={20} className="text-black" strokeWidth={3}/>
+                <span className="font-black text-[12px] text-black tracking-widest bg-[#FFCF40] px-2 py-1 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">INFO MOTOR HV</span>
               </div>
-              <p className="text-[11px] text-zinc-400 leading-relaxed mb-4">
-                Has habilitado el modo de selección detallada. Extraemos el desglose técnico directamente desde la base de datos maestra. Puedes seleccionar <strong>múltiples partidas</strong> dentro de cada fase. El motor multiplicará automáticamente el costo base por las cotas ingresadas en la parte superior.
+              <p className="text-[13px] font-bold text-black leading-relaxed mb-7">
+                El sistema extrae el desglose técnico directo de la base de datos maestra. Puedes seleccionar <strong className="bg-[#FFCF40] px-1 border-2 border-black">múltiples partidas</strong> dentro de cada etapa. Las operaciones matemáticas se ejecutarán en base a las medidas del ANÁLISIS INICIAL.
               </p>
               
-              <div className="bg-zinc-900 border border-zinc-800 p-3 rounded text-[10px] text-zinc-300 font-mono mb-4 leading-relaxed">
-                Área Analizada: {metrics.m2.toFixed(1)} m²<br/>
-                Perímetro Activo: {metrics.ml?.toFixed(1)} ml<br/>
-                {metrics.m3 > 0 && <>Volumen en Obra: {metrics.m3.toFixed(1)} m³</>}
+              <div className="bg-[#f0f0f0] border-2 border-black p-5 text-[13px] text-black font-mono font-black mb-8 leading-relaxed shadow-[4px_4px_0px_rgba(0,0,0,1)] flex flex-col gap-3">
+                <div className="flex justify-between items-center gap-2">Área Analizada: <span className="bg-white px-2 py-0.5 border-2 border-black whitespace-nowrap">{metrics.m2.toFixed(1)} m²</span></div>
+                <div className="flex justify-between items-center gap-2">Perímetro Activo: <span className="bg-white px-2 py-0.5 border-2 border-black whitespace-nowrap">{metrics.ml?.toFixed(1)} ml</span></div>
+                {metrics.m3 > 0 && <div className="flex justify-between items-center gap-2">Volumen en Obra: <span className="bg-white px-2 py-0.5 border-2 border-black whitespace-nowrap">{metrics.m3.toFixed(1)} m³</span></div>}
               </div>
 
               {/* Rango Referencial */}
               {projCat.ufMin && (
-                <div className="bg-zinc-900 border border-zinc-800 p-4 rounded mt-4">
-                  <div className="font-mono text-[9px] text-zinc-500 tracking-widest mb-2 text-center">RANGO DE MERCADO (UF/m²)</div>
-                  <div className="flex justify-between items-center text-white font-bold text-lg">
+                <div className="bg-[#111] border-2 border-black p-6 mt-8 text-white shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                  <div className="font-black text-[11px] text-[#FFCF40] tracking-widest mb-5 text-center border-b-2 border-[#FFCF40] pb-3">RANGO DE MERCADO (UF/m²)</div>
+                  <div className="flex justify-between items-center text-white font-black text-3xl">
                     <span>{projCat.ufMin}</span>
-                    <div className="flex-1 h-px bg-zinc-800 mx-3 relative">
-                      <div className="absolute h-1 bg-yellow-600 w-1/3 top-[-1.5px] left-1/3 shadow-[0_0_8px_rgba(234,179,8,0.5)]"></div>
+                    <div className="flex-1 h-[2px] bg-white mx-5 relative">
+                      <div className="absolute h-4 bg-[#FFCF40] border-y-2 border-black w-1/3 top-[-7px] left-1/3 shadow-[2px_2px_0px_rgba(0,0,0,1)]"></div>
                     </div>
                     <span>{projCat.ufMax}</span>
                   </div>
-                  <div className="text-[8px] text-center text-zinc-600 mt-2 uppercase">Referencia Construcción Chile</div>
+                  <div className="text-[10px] font-bold text-center text-gray-400 mt-5 uppercase tracking-widest">Referencia Construcción Chile</div>
                 </div>
               )}
             </div>
           </div>
 
           {/* COLUMNA 3: TICKET FIJO DE INVERSIÓN (CARRITO) */}
-          <div className="sticky top-6 bg-zinc-950 border-t-2 border-t-yellow-600 border-x border-b border-zinc-800 rounded-md shadow-2xl flex flex-col">
-            <div className="p-5 border-b border-zinc-800 bg-zinc-900/20">
-              <div className="flex items-center gap-2 mb-1">
-                <Zap size={16} className="text-yellow-500"/>
-                <span className="font-bold text-sm text-white uppercase tracking-wider">
+          <div className="sticky top-10 bg-white border-2 border-black shadow-[10px_10px_0px_rgba(0,0,0,1)] flex flex-col h-[calc(100vh-60px)] max-h-[750px] mb-10">
+            <div className="p-7 border-b-4 border-black bg-[#111] text-white">
+              <div className="flex items-center gap-2.5 mb-3">
+                <Zap size={22} strokeWidth={3} className="text-[#FFCF40]"/>
+                <span className="font-black text-xl text-white uppercase tracking-wider">
                   CARRITO DE OBRA
                 </span>
               </div>
-              <div className="font-mono text-[9px] text-zinc-400 tracking-widest">
+              <div className="font-black text-[11px] text-[#FFCF40] tracking-widest bg-white text-black px-2.5 py-1 inline-block border-2 border-black">
                 {metrics.m2.toFixed(1)} m² SUPERFICIE · {allTicket.length} PARTIDAS
               </div>
             </div>
 
-            <div className="max-h-[400px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-yellow-900/50 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-black scrollbar-track-transparent">
               {allTicket.length === 0 && (
-                <div className="font-mono text-[9px] text-zinc-600 text-center py-10 tracking-widest uppercase">
+                <div className="font-black text-[12px] text-gray-500 text-center py-16 tracking-widest uppercase border-2 border-dashed border-gray-300 m-5">
                   — Desglose vacío —
                 </div>
               )}
               {allTicket.map((it, i) => (
-                <div key={i} className="flex justify-between items-start gap-3 p-3 border-b border-zinc-900 last:border-0 hover:bg-zinc-900/50 transition-colors">
-                  <div className="text-zinc-400 max-w-[65%]">
-                    <div className="text-[8px] text-yellow-500 tracking-widest mb-1 uppercase font-mono truncate">
+                <div key={i} className="flex justify-between items-start gap-4 p-5 border-b-2 border-black last:border-b-0 hover:bg-[#f0f0f0] transition-colors">
+                  <div className="text-black max-w-[65%]">
+                    <div className="text-[10px] text-black bg-[#FFCF40] border-2 border-black px-1.5 font-black tracking-widest mb-2.5 uppercase font-mono w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                       {it.grupo}
                     </div>
-                    <div className="text-[10px] leading-tight font-medium text-zinc-300 line-clamp-2">{it.nombre}</div>
+                    <div className="text-[13px] leading-tight font-black text-black">{it.nombre}</div>
                   </div>
-                  <div className="font-mono text-[10px] font-bold text-white whitespace-nowrap bg-zinc-900 px-2 py-1 rounded border border-zinc-800">
+                  <div className="font-mono text-[13px] font-black text-black bg-white px-2.5 py-1.5 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] whitespace-nowrap">
                     {fmtUF(it.cost)} UF
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="p-5 border-t border-zinc-800 bg-zinc-900/80 rounded-b-md">
-              <div className="font-mono text-[9px] text-zinc-400 tracking-widest mb-1">TOTAL PROVISORIO (SIN IVA)</div>
-              <div className="font-black text-4xl text-white leading-none tracking-tight flex items-baseline gap-1">
-                {fmtUF(totalUF)} <span className="text-lg text-yellow-500">UF</span>
+            <div className="p-7 border-t-4 border-black bg-[#FFCF40]">
+              <div className="font-black text-[12px] text-black tracking-widest mb-3 uppercase">TOTAL PROVISORIO (SIN IVA)</div>
+              <div className="font-black text-5xl text-black leading-none tracking-tight flex items-baseline gap-2.5">
+                {fmtUF(totalUF)} <span className="text-2xl text-black">UF</span>
               </div>
-              <div className="font-mono text-xs text-zinc-500 mt-2 bg-zinc-950 inline-block px-2 py-1 rounded border border-zinc-800">
+              <div className="font-mono font-black text-sm text-white bg-[#111] border-2 border-black px-4 py-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)] mt-5 inline-block">
                 $ {fmt(totalUF * UF_VALOR)} CLP
               </div>
             </div>

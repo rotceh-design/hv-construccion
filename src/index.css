@@ -4,24 +4,64 @@
 
 /* Estilos globales básicos */
 body {
-  @apply bg-light text-dark font-sans antialiased;
+  /* 1. CORRECCIÓN: Quitamos el bg-light y forzamos un fondo negro oscuro absoluto de base */
+  @apply bg-[#080808] text-white font-sans antialiased;
+  background-color: #080808 !important; 
 }
 
-/* Scrollbar personalizada para que se vea más elegante en los paneles */
+/* ── FONDO GLOBAL ANIMADO CON LOGOS ── */
+.global-animated-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -999; /* Se mantiene detrás de todos los componentes */
+  pointer-events: none; /* Evita que el fondo bloquee los clicks de la app */
+  
+  /* 2. CORRECCIÓN: Quitamos el background-color de aquí.
+     El color sólido ya está en el body. Aquí solo va la imagen para que 
+     la opacidad afecte únicamente al logo y no nos transparente el negro. */
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/hv-construccion.firebasestorage.app/o/logo.png?alt=media&token=59649a35-319f-4ae7-b997-55cc147e1d17');
+  
+  /* 3. CORRECCIÓN: Aumentamos el tamaño a 400px para que respire y no se vea apretado */
+  background-size: 200px 200px; 
+  background-repeat: repeat;
+  
+  /* Opacidad ultrabaja para que funcione como marca de agua elegante */
+  opacity: 0.06; 
+  
+  /* Animación constante y mucho más fluida/lenta para no marear */
+  animation: moveDiagonalBg 40s linear infinite;
+}
+
+@keyframes moveDiagonalBg {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    /* 4. CORRECCIÓN CRÍTICA: Este valor DEBE coincidir con el background-size (400px).
+       Si son diferentes, la animación pega un salto feo al reiniciar el loop. */
+    background-position: 200px 200px; 
+  }
+}
+
+/* Scrollbar personalizada adaptada al nuevo estilo oscuro/HV */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px; /* Un poco más ancha para facilitar el uso en PC */
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #080808; 
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1; 
+  background: #222222; 
   border-radius: 4px;
+  border: 1px solid rgba(255, 207, 64, 0.2); /* Un leve toque del amarillo/dorado */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8; 
+  background: #FFCF40; /* Amarillo HV Construcción al pasar el mouse */
 }

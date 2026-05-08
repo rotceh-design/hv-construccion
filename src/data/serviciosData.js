@@ -2232,7 +2232,7 @@ export const PROYECTOS_DATA = {
           { id: 'sp_A04', nombre: 'Entrepiso viguetas metalcon 200mm + OSB 18mm', unidad: 'm²', ufRef: 2.10 },
           { id: 'sp_A05', nombre: 'Viga de amarre perimetral (cadena) hormigón armado', unidad: 'ml', ufRef: 0.45 },
           { id: 'sp_A06', nombre: 'Pilar hormigón armado nuevo (incluye moldaje + enfierradura)', unidad: 'ud', ufRef: 1.20 },
-          { id: 'sp_A07', nombre: 'Pilar metalcon estructural 150mm', unidad: 'ud', ufRef: 0.60 },
+          { id: 'sp_A07', nombre: 'Perfil Cuadrado Acero 100x3 mm', unidad: 'ud', ufRef: 0.80 },
           { id: 'sp_A08', nombre: 'Viga de madera laminada / LVL (apoyada en muros existentes)', unidad: 'ml', ufRef: 0.90 },
           { id: 'sp_A09', nombre: 'Dintel de acero HEB (apertura vano existente)', unidad: 'ud', ufRef: 2.50 },
           { id: 'sp_A10', nombre: 'Impermeabilización losa (membrana líquida + geotextil)', unidad: 'm²', ufRef: 0.55 },

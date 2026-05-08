@@ -105,92 +105,106 @@ function App() {
   // Pantalla de carga profesional
   if (!isAuthReady) {
     return (
-      <div className="min-h-screen bg-dark flex flex-col items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-primary font-bold animate-pulse uppercase tracking-widest text-sm">
-          Iniciando Sistemas HV
-        </p>
-      </div>
+      <>
+        {/* ── FONDO GLOBAL ANIMADO ── */}
+        <div className="global-animated-bg"></div>
+        
+        {/* Contenido de carga asegurando z-index para estar por encima del fondo */}
+        <div className="min-h-screen relative z-10 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-primary font-bold animate-pulse uppercase tracking-widest text-sm">
+            Iniciando Sistemas HV
+          </p>
+        </div>
+      </>
     );
   }
 
   return (
-    <Routes>
-      {/* ZONA PÚBLICA (Redirección inteligente) */}
-      <Route 
-        path="/" 
-        element={user ? <Navigate to={`/${user?.role}`} replace /> : <LandingPage />} 
-      /> 
-      <Route 
-        path="/login" 
-        element={user ? <Navigate to={`/${user?.role}`} replace /> : <Login />} 
-      />
-      
-      {/* 🚀 NUEVA RUTA: Aquí está el cotizador público */}
-      <Route 
-        path="/cotizador" 
-        element={<Cotizadorpage />} 
-      />
+    <>
+      {/* ── FONDO GLOBAL ANIMADO (Para el resto de la plataforma) ── */}
+      <div className="global-animated-bg"></div>
 
-      {/* ZONA 🏗️ ADMINISTRADOR HV */}
-      <Route path="/admin/*" element={
-        <ProtectedRoute isAllowed={!!user && user.role === 'admin'} >
-          <AdminLayout>
-            <Routes>
-              <Route index element={<Dashboard />} />
-              <Route path="presupuestos" element={<AdminBudgetBuilder />} /> {/* <-- RUTA 3D AÑADIDA */}
-              <Route path="configurador" element={<AiConfigurator />} />
-              <Route path="biblioteca" element={<ConstructionLibrary />} />
-              <Route path="finanzas" element={<Finances />} />
-              <Route path="team" element={<Team />} />
-            </Routes>
-          </AdminLayout>
-        </ProtectedRoute>
-      } />
+      {/* ENVOLTORIO PARA MANTENER LA APP SOBRE EL FONDO */}
+      <div className="relative z-10 w-full min-h-screen">
+        <Routes>
+          {/* ZONA PÚBLICA (Redirección inteligente) */}
+          <Route 
+            path="/" 
+            element={user ? <Navigate to={`/${user?.role}`} replace /> : <LandingPage />} 
+          /> 
+          <Route 
+            path="/login" 
+            element={user ? <Navigate to={`/${user?.role}`} replace /> : <Login />} 
+          />
+          
+          {/* 🚀 NUEVA RUTA: Aquí está el cotizador público */}
+          <Route 
+            path="/cotizador" 
+            element={<Cotizadorpage />} 
+          />
 
-      {/* ZONA 🔍 SUPERVISOR */}
-      <Route path="/supervisor/*" element={
-        <ProtectedRoute isAllowed={!!user && user.role === 'supervisor'} >
-          <SupervisorLayout>
-            <Routes>
-              <Route index element={<SupervisorDashboard />} />
-              <Route path="obras" element={<SupervisorWorks />} />
-              <Route path="aprobaciones" element={<SupervisorApprovals />} />
-            </Routes>
-          </SupervisorLayout>
-        </ProtectedRoute>
-      } />
+          {/* ZONA 🏗️ ADMINISTRADOR HV */}
+          <Route path="/admin/*" element={
+            <ProtectedRoute isAllowed={!!user && user.role === 'admin'} >
+              <AdminLayout>
+                <Routes>
+                  <Route index element={<Dashboard />} />
+                  <Route path="presupuestos" element={<AdminBudgetBuilder />} /> {/* <-- RUTA 3D AÑADIDA */}
+                  <Route path="configurador" element={<AiConfigurator />} />
+                  <Route path="biblioteca" element={<ConstructionLibrary />} />
+                  <Route path="finanzas" element={<Finances />} />
+                  <Route path="team" element={<Team />} />
+                </Routes>
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
 
-      {/* ZONA 👷 TRABAJADOR (Web App Móvil) */}
-      <Route path="/worker/*" element={
-        <ProtectedRoute isAllowed={!!user && user.role === 'worker'} >
-          <WorkerLayout>
-            <Routes>
-              <Route index element={<WorkerDashboard />} />
-              <Route path="parte-diario" element={<DailyReport />} />
-              <Route path="subir-foto" element={<PhotoUpload />} />
-              <Route path="playbook" element={<Playbook />} />
-            </Routes>
-          </WorkerLayout>
-        </ProtectedRoute>
-      } />
+          {/* ZONA 🔍 SUPERVISOR */}
+          <Route path="/supervisor/*" element={
+            <ProtectedRoute isAllowed={!!user && user.role === 'supervisor'} >
+              <SupervisorLayout>
+                <Routes>
+                  <Route index element={<SupervisorDashboard />} />
+                  <Route path="obras" element={<SupervisorWorks />} />
+                  <Route path="aprobaciones" element={<SupervisorApprovals />} />
+                </Routes>
+              </SupervisorLayout>
+            </ProtectedRoute>
+          } />
 
-      {/* ZONA 🏠 CLIENTE PORTAL */}
-      <Route path="/client/*" element={
-        <ProtectedRoute isAllowed={!!user && user.role === 'client'} >
-          <ClientLayout>
-            <Routes>
-              <Route index element={<ClientDashboard />} />
-              <Route path="avance" element={<ClientPhotoGallery />} />
-              <Route path="pagos" element={<ClientPayments />} />
-            </Routes>
-          </ClientLayout>
-        </ProtectedRoute>
-      } />
+          {/* ZONA 👷 TRABAJADOR (Web App Móvil) */}
+          <Route path="/worker/*" element={
+            <ProtectedRoute isAllowed={!!user && user.role === 'worker'} >
+              <WorkerLayout>
+                <Routes>
+                  <Route index element={<WorkerDashboard />} />
+                  <Route path="parte-diario" element={<DailyReport />} />
+                  <Route path="subir-foto" element={<PhotoUpload />} />
+                  <Route path="playbook" element={<Playbook />} />
+                </Routes>
+              </WorkerLayout>
+            </ProtectedRoute>
+          } />
 
-      {/* Redirección automática para rutas inexistentes */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          {/* ZONA 🏠 CLIENTE PORTAL */}
+          <Route path="/client/*" element={
+            <ProtectedRoute isAllowed={!!user && user.role === 'client'} >
+              <ClientLayout>
+                <Routes>
+                  <Route index element={<ClientDashboard />} />
+                  <Route path="avance" element={<ClientPhotoGallery />} />
+                  <Route path="pagos" element={<ClientPayments />} />
+                </Routes>
+              </ClientLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Redirección automática para rutas inexistentes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </>
   );
 }
 
